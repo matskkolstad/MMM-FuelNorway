@@ -106,6 +106,42 @@ function findCheapest(stations, fuelTypes) {
   return cheapest
 }
 
+function getBestPriceAcrossFuelTypes(station, fuelTypes) {
+  const prices = fuelTypes
+    .map((fuelType) => station[fuelType])
+    .filter((price) => price !== null && price !== undefined && Number.isFinite(price))
+  if (prices.length === 0) return null
+  return Math.min(...prices)
+}
+
+function sortStationsByBestPrice(stations, fuelTypes) {
+  return [...stations].sort((a, b) => {
+    const bestA = getBestPriceAcrossFuelTypes(a, fuelTypes)
+    const bestB = getBestPriceAcrossFuelTypes(b, fuelTypes)
+
+    if (bestA === null && bestB === null) return 0
+    if (bestA === null) return 1
+    if (bestB === null) return -1
+    if (bestA !== bestB) return bestA - bestB
+
+    const distanceA = Number.isFinite(a.distance) ? a.distance : Infinity
+    const distanceB = Number.isFinite(b.distance) ? b.distance : Infinity
+    if (distanceA !== distanceB) return distanceA - distanceB
+
+    const updatedA = a.last_updated ? new Date(a.last_updated).getTime() : 0
+    const updatedB = b.last_updated ? new Date(b.last_updated).getTime() : 0
+    if (!Number.isNaN(updatedA) && !Number.isNaN(updatedB) && updatedA !== updatedB) {
+      return updatedB - updatedA
+    }
+
+    return 0
+  })
+}
+
+function selectStationsForDisplay(stations, fuelTypes, maxStations) {
+  return sortStationsByBestPrice(stations, fuelTypes).slice(0, maxStations ?? stations.length)
+}
+
 function sortStationsByPrice(stations, fuelType) {
   return [...stations].sort((a, b) => {
     const pa = a[fuelType] !== null && a[fuelType] !== undefined ? a[fuelType] : Infinity
@@ -358,5 +394,31 @@ describe('highlightCheapest logic', () => {
     const cheapest = findCheapest(sampleStations, ['gasoline_price', 'diesel_price'])
     assert.strictEqual(cheapest.gasoline_price, 19.29)
     assert.strictEqual(cheapest.diesel_price, 18.59)
+  })
+})
+
+describe('Best price selection and maxStations', () => {
+  const mixedStations = [
+    { id: '1', name: 'Station 1', gasoline_price: 19.8, diesel_price: 20.2, distance: 2.5 },
+    { id: '2', name: 'Station 2', gasoline_price: 19.4, diesel_price: null, distance: 1.1 },
+    { id: '3', name: 'Station 3', gasoline_price: 19.6, diesel_price: 19.7, distance: 0.5 },
+    { id: '4', name: 'Station 4', gasoline_price: null, diesel_price: 19.5, distance: 4.2 }
+  ]
+
+  test('derives best price across configured fuel types', () => {
+    assert.strictEqual(getBestPriceAcrossFuelTypes(mixedStations[0], ['gasoline_price', 'diesel_price']), 19.8)
+    assert.strictEqual(getBestPriceAcrossFuelTypes(mixedStations[3], ['gasoline_price', 'diesel_price']), 19.5)
+    assert.strictEqual(getBestPriceAcrossFuelTypes({ gasoline_price: null, diesel_price: null }, ['gasoline_price', 'diesel_price']), null)
+  })
+
+  test('sorts stations by best available price and limits to maxStations', () => {
+    const selected = selectStationsForDisplay(mixedStations, ['gasoline_price', 'diesel_price'], 2)
+    assert.deepStrictEqual(selected.map((s) => s.id), ['2', '4'])
+  })
+
+  test('finds cheapest prices within displayed stations respecting maxStations', () => {
+    const selected = selectStationsForDisplay(mixedStations, ['gasoline_price', 'diesel_price'], 2)
+    const cheapestVisible = findCheapest(selected, ['diesel_price'])
+    assert.strictEqual(cheapestVisible.diesel_price, 19.5)
   })
 })

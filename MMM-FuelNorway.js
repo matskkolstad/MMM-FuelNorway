@@ -131,11 +131,11 @@ Module.register('MMM-FuelNorway', {
     container.className = baseClasses.filter(Boolean).join(' ')
     container.style.setProperty('--mmm-fuelnorway-accent', this.config.priceHighlightColor || '#00ff00')
 
-    const cheapestByFuelType = this.findCheapest(this.stationData, this.config.fuelTypes)
-    const stations = this.stationData.slice(0, this.config.maxStations)
+    const stationsForDisplay = this.selectStationsForDisplay(this.stationData, this.config.fuelTypes, this.config.maxStations)
+    const cheapestByFuelType = this.findCheapest(stationsForDisplay, this.config.fuelTypes)
 
     if (isGridMode) {
-      stations.forEach((station) => {
+      stationsForDisplay.forEach((station) => {
         const stationEl = this.buildStationElement(station, cheapestByFuelType, 'grid')
         container.appendChild(stationEl)
       })
@@ -145,7 +145,7 @@ Module.register('MMM-FuelNorway', {
       const listBody = document.createElement('div')
       listBody.className = 'mmm-fuelnorway-list-body'
 
-      stations.forEach((station) => {
+      stationsForDisplay.forEach((station) => {
         const stationEl = this.buildStationElement(station, cheapestByFuelType, 'list')
         listBody.appendChild(stationEl)
       })
@@ -156,6 +156,43 @@ Module.register('MMM-FuelNorway', {
 
     wrapper.appendChild(container)
     return wrapper
+  },
+
+  getBestPriceAcrossFuelTypes(station, fuelTypes) {
+    const prices = fuelTypes
+      .map((fuelType) => station[fuelType])
+      .filter((price) => price !== null && price !== undefined && Number.isFinite(price))
+    if (prices.length === 0) return null
+    return Math.min(...prices)
+  },
+
+  sortStationsByBestPrice(stations, fuelTypes) {
+    return [...stations].sort((a, b) => {
+      const bestA = this.getBestPriceAcrossFuelTypes(a, fuelTypes)
+      const bestB = this.getBestPriceAcrossFuelTypes(b, fuelTypes)
+
+      if (bestA === null && bestB === null) return 0
+      if (bestA === null) return 1
+      if (bestB === null) return -1
+      if (bestA !== bestB) return bestA - bestB
+
+      const distanceA = Number.isFinite(a.distance) ? a.distance : Infinity
+      const distanceB = Number.isFinite(b.distance) ? b.distance : Infinity
+      if (distanceA !== distanceB) return distanceA - distanceB
+
+      const updatedA = a.last_updated ? new Date(a.last_updated).getTime() : 0
+      const updatedB = b.last_updated ? new Date(b.last_updated).getTime() : 0
+      if (!Number.isNaN(updatedA) && !Number.isNaN(updatedB) && updatedA !== updatedB) {
+        return updatedB - updatedA
+      }
+
+      return 0
+    })
+  },
+
+  selectStationsForDisplay(stations, fuelTypes, maxStations) {
+    const limited = this.sortStationsByBestPrice(stations, fuelTypes)
+    return limited.slice(0, maxStations)
   },
 
   findCheapest(stations, fuelTypes) {
