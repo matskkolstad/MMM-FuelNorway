@@ -79,6 +79,18 @@ function getFuelLabel(fuelType) {
   return map[fuelType] || fuelType
 }
 
+function getStationName(station) {
+  const candidates = [
+    station && station.name,
+    station && station.station_name,
+    station && station.stationName,
+    station && station.address && station.address.street,
+    station && station.id
+  ]
+  const resolved = candidates.find((value) => typeof value === 'string' && value.trim().length > 0)
+  return resolved ? resolved.trim() : 'Unknown station'
+}
+
 function findCheapest(stations, fuelTypes) {
   const cheapest = {}
   fuelTypes.forEach((fuelType) => {
@@ -184,6 +196,10 @@ describe('Price formatting', () => {
   test('handles integer prices', () => {
     assert.strictEqual(formatPrice(20, 2, 'NOK', true), '20.00')
   })
+
+  test('respects custom currency labels', () => {
+    assert.strictEqual(formatPrice(21.1, 2, 'EUR', false), '21.10 EUR')
+  })
 })
 
 describe('Timestamp formatting', () => {
@@ -214,6 +230,12 @@ describe('Timestamp formatting', () => {
 
   test('returns empty string for invalid timestamp value', () => {
     assert.strictEqual(formatTimestamp('not-a-date', 'relative'), '')
+  })
+
+  test('formats timestamp in absolute mode', () => {
+    const specific = '2024-03-15T12:00:00Z'
+    const formatted = formatTimestamp(specific, 'absolute')
+    assert.ok(typeof formatted === 'string' && formatted.includes(':'), 'absolute timestamp should contain a time separator')
   })
 })
 
@@ -264,6 +286,23 @@ describe('Address formatting', () => {
 
   test('returns empty string for null address', () => {
     assert.strictEqual(formatAddress(null, 'street'), '')
+  })
+})
+
+describe('Station naming', () => {
+  test('returns provided station name when present', () => {
+    const station = { name: 'Primary Name', address: { street: 'Gate 1' }, id: 'id-1' }
+    assert.strictEqual(getStationName(station), 'Primary Name')
+  })
+
+  test('falls back to address street when name fields are empty', () => {
+    const station = { name: '', station_name: '', address: { street: 'Fallback Street' }, id: 'id-2' }
+    assert.strictEqual(getStationName(station), 'Fallback Street')
+  })
+
+  test('uses id as a final fallback', () => {
+    const station = { name: '', station_name: '', address: { street: '' }, id: 'id-3' }
+    assert.strictEqual(getStationName(station), 'id-3')
   })
 })
 

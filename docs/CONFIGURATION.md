@@ -69,7 +69,7 @@ All available configuration options for the MMM-FuelNorway module.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `showStationName` | `boolean` | `true` | Show the station name |
+| `showStationName` | `boolean` | `true` | Show the station name (falls back to address/ID when missing from the API) |
 | `showAddress` | `boolean` | `true` | Show the station address |
 | `addressFormat` | `string` | `'street'` | Address format: `'street'`, `'city'`, or `'full'` |
 | `showLastUpdated` | `boolean` | `true` | Show when the price was last updated |

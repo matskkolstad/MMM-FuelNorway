@@ -13,5 +13,6 @@
   "KM_AWAY": "km away",
   "MODULE_TITLE": "Fuel Prices",
   "RETRY": "Retrying...",
-  "CONFIG_ERROR": "Configuration error"
+  "CONFIG_ERROR": "Configuration error",
+  "UNKNOWN_STATION": "Unknown station"
 }

@@ -124,6 +124,7 @@ Module.register('MMM-FuelNorway', {
     const orientation = this.config.orientation === 'horizontal' ? 'mmm-fuelnorway-horizontal' : ''
     const size = `mmm-fuelnorway-${this.config.moduleSize}`
     container.className = [displayMode, orientation, size].filter(Boolean).join(' ')
+    container.style.setProperty('--mmm-fuelnorway-accent', this.config.priceHighlightColor || '#00ff00')
 
     const cheapestByFuelType = this.findCheapest(this.stationData, this.config.fuelTypes)
     const stations = this.stationData.slice(0, this.config.maxStations)
@@ -158,25 +159,44 @@ Module.register('MMM-FuelNorway', {
     const el = document.createElement('div')
     el.className = 'mmm-fuelnorway-station'
 
+    const header = document.createElement('div')
+    header.className = 'mmm-fuelnorway-header'
+
+    const heading = document.createElement('div')
+    heading.className = 'mmm-fuelnorway-heading'
+
     if (this.config.showBrandLogo && station.logo) {
       const logoContainer = document.createElement('div')
       logoContainer.className = 'mmm-fuelnorway-logo'
       const logo = document.createElement('img')
       logo.src = station.logo
-      logo.alt = station.name || ''
+      logo.alt = this.getStationName(station)
       logoContainer.appendChild(logo)
-      el.appendChild(logoContainer)
+      heading.appendChild(logoContainer)
     }
+
+    if (this.config.showStationName) {
+      const name = document.createElement('div')
+      name.className = 'mmm-fuelnorway-name'
+      name.textContent = this.getStationName(station)
+      heading.appendChild(name)
+    }
+
+    if (heading.childElementCount > 0) {
+      header.appendChild(heading)
+    }
+
+    if (station.distance !== null && station.distance !== undefined) {
+      const dist = document.createElement('div')
+      dist.className = 'mmm-fuelnorway-distance'
+      dist.textContent = `${Number(station.distance).toFixed(1)} ${this.translate('KM_AWAY')}`
+      header.appendChild(dist)
+    }
+
+    el.appendChild(header)
 
     const info = document.createElement('div')
     info.className = 'mmm-fuelnorway-info'
-
-    if (this.config.showStationName && station.name) {
-      const name = document.createElement('div')
-      name.className = 'mmm-fuelnorway-name'
-      name.textContent = station.name
-      info.appendChild(name)
-    }
 
     if (this.config.showAddress && station.address) {
       const address = document.createElement('div')
@@ -184,15 +204,6 @@ Module.register('MMM-FuelNorway', {
       address.textContent = this.formatAddress(station.address, this.config.addressFormat)
       info.appendChild(address)
     }
-
-    if (station.distance !== null && station.distance !== undefined) {
-      const dist = document.createElement('div')
-      dist.className = 'mmm-fuelnorway-distance'
-      dist.textContent = `${Number(station.distance).toFixed(1)} ${this.translate('KM_AWAY')}`
-      info.appendChild(dist)
-    }
-
-    el.appendChild(info)
 
     const prices = document.createElement('div')
     prices.className = 'mmm-fuelnorway-prices'
@@ -202,15 +213,12 @@ Module.register('MMM-FuelNorway', {
       const priceEl = document.createElement('div')
       const isCheapest = this.config.highlightCheapest && cheapestByFuelType[fuelType] !== null && price === cheapestByFuelType[fuelType]
       priceEl.className = 'mmm-fuelnorway-price' + (isCheapest ? ' mmm-fuelnorway-cheapest' : '')
-      if (isCheapest) {
-        priceEl.style.color = this.config.priceHighlightColor
-      }
 
-      const label = document.createElement('span')
+      const label = document.createElement('div')
       label.className = 'mmm-fuelnorway-fuel-label'
       label.textContent = this.getFuelLabel(fuelType)
 
-      const value = document.createElement('span')
+      const value = document.createElement('div')
       value.className = 'mmm-fuelnorway-fuel-value'
       const formattedPrice = this.formatPrice(price)
       const hasPrice = formattedPrice !== '-'
@@ -224,17 +232,33 @@ Module.register('MMM-FuelNorway', {
       prices.appendChild(priceEl)
     })
 
-    el.appendChild(prices)
-
     if (this.config.showLastUpdated && station.last_updated) {
+      const formattedTimestamp = this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)
       const updated = document.createElement('div')
       updated.className = 'mmm-fuelnorway-updated'
-      const formattedTimestamp = this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)
       updated.textContent = `${this.translate('LAST_UPDATED')}: ${formattedTimestamp || '-'}`
-      el.appendChild(updated)
+      info.appendChild(updated)
     }
 
+    if (info.childElementCount > 0) {
+      el.appendChild(info)
+    }
+
+    el.appendChild(prices)
+
     return el
+  },
+
+  getStationName(station) {
+    const candidates = [
+      station && station.name,
+      station && station.station_name,
+      station && station.stationName,
+      station && station.address && station.address.street,
+      station && station.id
+    ]
+    const resolved = candidates.find((value) => typeof value === 'string' && value.trim().length > 0)
+    return resolved ? resolved.trim() : this.translate('UNKNOWN_STATION')
   },
 
   formatAddress(address, format) {

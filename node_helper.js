@@ -71,6 +71,40 @@ module.exports = NodeHelper.create({
     }
   },
 
+  resolveStationName(raw) {
+    const address = this.buildAddress(raw)
+    const locationAddress = raw && raw.location && typeof raw.location.address === 'string'
+      ? raw.location.address
+      : ''
+    const candidates = [
+      raw && raw.name,
+      raw && raw.station_name,
+      raw && raw.stationName,
+      raw && raw.station && raw.station.name,
+      address.street,
+      raw && raw.location && raw.location.name,
+      locationAddress,
+      raw && raw.id
+    ]
+    const match = candidates.find((value) => typeof value === 'string' && value.trim().length > 0)
+    return match ? match.trim() : 'Unknown station'
+  },
+
+  buildAddress(raw) {
+    const location = (raw && raw.location) || {}
+    const addressLine = typeof location.address === 'string' ? location.address : ''
+    const [addressStreet, ...addressRest] = addressLine
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+
+    const street = raw.street || addressStreet || ''
+    const city = raw.city || (addressRest.length > 0 ? addressRest.join(', ') : '')
+    const zip = raw.zip || ''
+
+    return { street, city, zip }
+  },
+
   // Normalise a raw API station object into the flat format the front-end expects.
   // The real API nests prices under station.prices and the address as separate flat
   // fields (street / city / zip), so we flatten everything here.
@@ -81,6 +115,8 @@ module.exports = NodeHelper.create({
     const stationLng = toNumber(location.longitude)
     const userLatNum = toNumber(userLat)
     const userLngNum = toNumber(userLng)
+    const resolvedName = this.resolveStationName(raw)
+    const address = this.buildAddress(raw)
 
     let distance = null
     if (userLatNum !== null && userLngNum !== null && stationLat !== null && stationLng !== null) {
@@ -89,12 +125,8 @@ module.exports = NodeHelper.create({
 
     return {
       id: raw.id,
-      name: raw.name || raw.station_name || '',
-      address: {
-        street: raw.street || '',
-        city: raw.city || '',
-        zip: raw.zip || ''
-      },
+      name: resolvedName,
+      address,
       latitude: stationLat,
       longitude: stationLng,
       distance,

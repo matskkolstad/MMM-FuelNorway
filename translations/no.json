@@ -13,5 +13,6 @@
   "KM_AWAY": "km unna",
   "MODULE_TITLE": "Drivstoffpriser",
   "RETRY": "Prøver igjen...",
-  "CONFIG_ERROR": "Konfigurasjonsfeil"
+  "CONFIG_ERROR": "Konfigurasjonsfeil",
+  "UNKNOWN_STATION": "Ukjent stasjon"
 }

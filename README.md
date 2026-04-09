@@ -13,6 +13,8 @@ A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwe
 - 🗺️ **List and grid layouts** – vertical or horizontal orientation
 - 📐 **Three size variants** – small, medium, large
 - 🖼️ **Brand logos** – shows the station's brand logo when available
+- 🎨 **Refreshed cards** – modern layout inspired by MMM-Sonos with accent highlights
+- 🏷️ **Resilient naming** – falls back to address/ID when station names are missing from the API
 - 🌍 **Bilingual** – English and Norwegian (Bokmål/Nynorsk) translations
 - ♻️ **Smart caching** – avoids redundant API calls between update intervals
 - 🔄 **Auto-retry** – configurable retry logic on API failure
@@ -174,6 +176,7 @@ Each station object in the response contains an `id` field — use that value in
 | Prices show `–` for every station | Verify `fuelTypes` contains valid keys — see the API notes section |
 | Prices not updating | The module caches results; wait for `updateInterval` to expire |
 | Module blank on startup | Verify `method`, `latitude`, and `longitude` are set correctly |
+| Station names are blank | The helper now falls back to address/ID; ensure the API returns location data |
 
 Enable debug logging with `debug: true` in the config. Logs appear in the MagicMirror server console prefixed with `[MMM-FuelNorway]`.
 
