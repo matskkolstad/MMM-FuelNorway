@@ -60,9 +60,9 @@ All available configuration options for the MMM-FuelNorway module.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `displayMode` | `string` | `'list'` | Layout mode: `'list'` or `'grid'` |
-| `orientation` | `string` | `'vertical'` | Item flow: `'vertical'` or `'horizontal'` |
-| `moduleSize` | `string` | `'medium'` | Font/element size: `'small'`, `'medium'`, or `'large'` |
+| `displayMode` | `string` | `'list'` | Layout mode: `'list'` (single card with station rows) or `'grid'` (one card per station) |
+| `orientation` | `string` | `'vertical'` | Item flow: `'vertical'` (stack details/prices) or `'horizontal'` (side-by-side details and prices) |
+| `moduleSize` | `string` | `'medium'` | Font/element size: `'small'` (compact padding), `'medium'`, or `'large'` |
 | `maxStations` | `number` | `5` | Maximum number of stations to display |
 
 ### Station Details

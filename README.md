@@ -12,6 +12,7 @@ A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwe
 - 🏆 **Cheapest price highlight** – visually flag the best price per fuel type
 - 🗺️ **List and grid layouts** – vertical or horizontal orientation
 - 📐 **Three size variants** – small, medium, large
+- 🧩 **Compact list view** – single card with per-station rows for dense setups
 - 🖼️ **Brand logos** – shows the station's brand logo when available
 - 🎨 **Refreshed cards** – modern layout inspired by MMM-Sonos with accent highlights
 - 🏷️ **Resilient naming** – falls back to address/ID when station names are missing from the API
@@ -98,6 +99,14 @@ Add the module to your `config/config.js`:
 - `latitude`, `longitude`, and `radius` accept either numbers or numeric strings (useful when values come from environment variables).
 - In `manual` mode you can still provide `latitude`/`longitude`; when present, distances are calculated for those stations too.
 - Configuration errors returned by the helper are now surfaced in the module UI to speed up troubleshooting.
+- `displayMode: 'list'` renders all stations inside a single card, keeping rows compact. Switch to `'grid'` for individual cards per station.
+- `moduleSize: 'small'` tightens padding and price chips to reduce whitespace on dense dashboards.
+
+### Layout tips
+
+- Use `orientation: 'horizontal'` in list mode to keep station details on the left and prices on the right; the module will automatically flow rows into multiple columns when space allows.
+- Use `orientation: 'vertical'` for narrow regions — prices stack beneath the station details to avoid overlap in both list and grid modes.
+- `moduleSize: 'small'` now trims padding and chip spacing for dashboards that need to fit many modules.
 
 ### Manual – specific stations
 
