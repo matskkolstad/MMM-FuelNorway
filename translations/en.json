@@ -1,0 +1,15 @@
+{
+  "LOADING": "Loading fuel prices...",
+  "ERROR": "Error loading fuel prices",
+  "NO_STATIONS": "No stations found",
+  "LAST_UPDATED": "Updated",
+  "CHEAPEST": "Best price",
+  "FUEL_GASOLINE": "Petrol",
+  "FUEL_DIESEL": "Diesel",
+  "FUEL_HVO100": "HVO100",
+  "FUEL_FD": "Electric",
+  "KM_AWAY": "km away",
+  "MODULE_TITLE": "Fuel Prices",
+  "RETRY": "Retrying...",
+  "CONFIG_ERROR": "Configuration error"
+}

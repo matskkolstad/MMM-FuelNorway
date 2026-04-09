@@ -1,0 +1,19 @@
+{
+  "id": "circle-k-oslo-sentrum",
+  "name": "Circle K Oslo Sentrum",
+  "address": {
+    "street": "Grensen 5",
+    "city": "Oslo",
+    "zip": "0159"
+  },
+  "latitude": 59.9136,
+  "longitude": 10.7454,
+  "distance": 0.3,
+  "gasoline_price": 19.49,
+  "diesel_price": 18.79,
+  "hvo100_price": 21.99,
+  "fd_price": null,
+  "last_updated": "2024-03-15T08:30:00Z",
+  "logo": "https://cdn.drivstoffapp.no/logos/circle-k.png",
+  "amenities": ["shop", "car_wash", "cafe"]
+}
