@@ -1,0 +1,203 @@
+/* MMM-FuelNorway Module Styles */
+
+.MMM-FuelNorway {
+  font-family: inherit;
+  color: #fff;
+  width: 100%;
+}
+
+/* ── Loading / Error / Empty states ── */
+
+.mmm-fuelnorway-loading,
+.mmm-fuelnorway-error,
+.mmm-fuelnorway-empty {
+  text-align: center;
+  padding: 10px;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.mmm-fuelnorway-error {
+  color: #ff6b6b;
+}
+
+/* ── Container modes ── */
+
+.mmm-fuelnorway-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.mmm-fuelnorway-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal {
+  grid-auto-flow: column;
+  grid-template-rows: auto;
+  grid-template-columns: none;
+}
+
+/* ── Size variants ── */
+
+.mmm-fuelnorway-small {
+  font-size: 0.75em;
+}
+
+.mmm-fuelnorway-medium {
+  font-size: 0.9em;
+}
+
+.mmm-fuelnorway-large {
+  font-size: 1.05em;
+}
+
+/* ── Station card ── */
+
+.mmm-fuelnorway-station {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 8px;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-station {
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mmm-fuelnorway-list .mmm-fuelnorway-station:last-child {
+  border-bottom: none;
+}
+
+/* ── Logo ── */
+
+.mmm-fuelnorway-logo {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mmm-fuelnorway-logo img {
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.mmm-fuelnorway-small .mmm-fuelnorway-logo,
+.mmm-fuelnorway-small .mmm-fuelnorway-logo img {
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.mmm-fuelnorway-large .mmm-fuelnorway-logo,
+.mmm-fuelnorway-large .mmm-fuelnorway-logo img {
+  width: 48px;
+  height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+}
+
+/* ── Station info ── */
+
+.mmm-fuelnorway-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mmm-fuelnorway-name {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #eee;
+}
+
+.mmm-fuelnorway-address {
+  font-size: 0.85em;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mmm-fuelnorway-distance {
+  font-size: 0.8em;
+  opacity: 0.55;
+}
+
+/* ── Prices ── */
+
+.mmm-fuelnorway-prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.mmm-fuelnorway-price {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.mmm-fuelnorway-fuel-label {
+  font-size: 0.8em;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mmm-fuelnorway-fuel-value {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.mmm-fuelnorway-cheapest .mmm-fuelnorway-fuel-value {
+  font-weight: 700;
+}
+
+.mmm-fuelnorway-unavailable .mmm-fuelnorway-fuel-value {
+  opacity: 0.35;
+}
+
+/* ── Last updated ── */
+
+.mmm-fuelnorway-updated {
+  font-size: 0.75em;
+  opacity: 0.45;
+  text-align: right;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-station .mmm-fuelnorway-updated {
+  text-align: left;
+  margin-top: 6px;
+}

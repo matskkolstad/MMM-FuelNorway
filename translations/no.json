@@ -1,0 +1,15 @@
+{
+  "LOADING": "Laster drivstoffpriser...",
+  "ERROR": "Feil ved lasting av priser",
+  "NO_STATIONS": "Ingen stasjoner funnet",
+  "LAST_UPDATED": "Oppdatert",
+  "CHEAPEST": "Beste pris",
+  "FUEL_GASOLINE": "Bensin",
+  "FUEL_DIESEL": "Diesel",
+  "FUEL_HVO100": "HVO100",
+  "FUEL_FD": "Elektrisk",
+  "KM_AWAY": "km unna",
+  "MODULE_TITLE": "Drivstoffpriser",
+  "RETRY": "Prøver igjen...",
+  "CONFIG_ERROR": "Konfigurasjonsfeil"
+}

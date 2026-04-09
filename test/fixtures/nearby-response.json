@@ -1,0 +1,59 @@
+[
+  {
+    "id": "circle-k-oslo-sentrum",
+    "name": "Circle K Oslo Sentrum",
+    "address": {
+      "street": "Grensen 5",
+      "city": "Oslo",
+      "zip": "0159"
+    },
+    "latitude": 59.9136,
+    "longitude": 10.7454,
+    "distance": 0.3,
+    "gasoline_price": 19.49,
+    "diesel_price": 18.79,
+    "hvo100_price": 21.99,
+    "fd_price": null,
+    "last_updated": "2024-03-15T08:30:00Z",
+    "logo": "https://cdn.drivstoffapp.no/logos/circle-k.png",
+    "amenities": ["shop", "car_wash", "cafe"]
+  },
+  {
+    "id": "uno-x-gronland",
+    "name": "Uno-X Grønland",
+    "address": {
+      "street": "Schweigaardsgate 34",
+      "city": "Oslo",
+      "zip": "0191"
+    },
+    "latitude": 59.9091,
+    "longitude": 10.7617,
+    "distance": 0.8,
+    "gasoline_price": 19.29,
+    "diesel_price": 18.59,
+    "hvo100_price": null,
+    "fd_price": null,
+    "last_updated": "2024-03-15T09:00:00Z",
+    "logo": "https://cdn.drivstoffapp.no/logos/uno-x.png",
+    "amenities": ["shop"]
+  },
+  {
+    "id": "esso-helsfyr",
+    "name": "Esso Helsfyr",
+    "address": {
+      "street": "Strømsveien 96",
+      "city": "Oslo",
+      "zip": "0663"
+    },
+    "latitude": 59.9043,
+    "longitude": 10.7934,
+    "distance": 2.1,
+    "gasoline_price": 19.69,
+    "diesel_price": 18.99,
+    "hvo100_price": null,
+    "fd_price": 4.89,
+    "last_updated": "2024-03-15T07:45:00Z",
+    "logo": "https://cdn.drivstoffapp.no/logos/esso.png",
+    "amenities": ["shop", "electric_charger"]
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "name": "mmm-fuelnorway",
+  "version": "1.0.0",
+  "description": "MagicMirror² module displaying Norwegian fuel prices via the Drivstoff App API",
+  "main": "MMM-FuelNorway.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test test/MMM-FuelNorway.test.js test/node_helper.test.js",
+    "audit": "npm audit"
+  },
+  "keywords": ["MagicMirror", "fuel", "norway", "price"],
+  "author": "Mats Kjoshagen Kolstad",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
