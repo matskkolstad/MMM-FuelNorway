@@ -120,19 +120,39 @@ Module.register('MMM-FuelNorway', {
     }
 
     const container = document.createElement('div')
-    const displayMode = this.config.displayMode === 'grid' ? 'mmm-fuelnorway-grid' : 'mmm-fuelnorway-list'
-    const orientation = this.config.orientation === 'horizontal' ? 'mmm-fuelnorway-horizontal' : ''
+    const isGridMode = this.config.displayMode === 'grid'
+    const displayMode = isGridMode ? 'mmm-fuelnorway-grid' : 'mmm-fuelnorway-list'
+    const orientation = this.config.orientation === 'horizontal' ? 'mmm-fuelnorway-horizontal' : 'mmm-fuelnorway-vertical'
     const size = `mmm-fuelnorway-${this.config.moduleSize}`
-    container.className = [displayMode, orientation, size].filter(Boolean).join(' ')
+    const baseClasses = [displayMode, orientation, size]
+    if (!isGridMode) {
+      baseClasses.push('mmm-fuelnorway-list-wrapper')
+    }
+    container.className = baseClasses.filter(Boolean).join(' ')
     container.style.setProperty('--mmm-fuelnorway-accent', this.config.priceHighlightColor || '#00ff00')
 
     const cheapestByFuelType = this.findCheapest(this.stationData, this.config.fuelTypes)
     const stations = this.stationData.slice(0, this.config.maxStations)
 
-    stations.forEach((station) => {
-      const stationEl = this.buildStationElement(station, cheapestByFuelType)
-      container.appendChild(stationEl)
-    })
+    if (isGridMode) {
+      stations.forEach((station) => {
+        const stationEl = this.buildStationElement(station, cheapestByFuelType, 'grid')
+        container.appendChild(stationEl)
+      })
+    } else {
+      const listCard = document.createElement('div')
+      listCard.className = 'mmm-fuelnorway-list-card'
+      const listBody = document.createElement('div')
+      listBody.className = 'mmm-fuelnorway-list-body'
+
+      stations.forEach((station) => {
+        const stationEl = this.buildStationElement(station, cheapestByFuelType, 'list')
+        listBody.appendChild(stationEl)
+      })
+
+      listCard.appendChild(listBody)
+      container.appendChild(listCard)
+    }
 
     wrapper.appendChild(container)
     return wrapper
@@ -155,9 +175,9 @@ Module.register('MMM-FuelNorway', {
     return cheapest
   },
 
-  buildStationElement(station, cheapestByFuelType) {
+  buildStationElement(station, cheapestByFuelType, variant = 'grid') {
     const el = document.createElement('div')
-    el.className = 'mmm-fuelnorway-station'
+    el.className = ['mmm-fuelnorway-station', variant === 'list' ? 'mmm-fuelnorway-list-item' : ''].filter(Boolean).join(' ')
 
     const header = document.createElement('div')
     header.className = 'mmm-fuelnorway-header'
@@ -206,7 +226,7 @@ Module.register('MMM-FuelNorway', {
     }
 
     const prices = document.createElement('div')
-    prices.className = 'mmm-fuelnorway-prices'
+    prices.className = 'mmm-fuelnorway-prices' + (variant === 'list' ? ' mmm-fuelnorway-inline-prices' : '')
 
     this.config.fuelTypes.forEach((fuelType) => {
       const price = station[fuelType]
