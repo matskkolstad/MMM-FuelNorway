@@ -22,6 +22,40 @@ function toNumber(value) {
   return Number.isFinite(num) ? num : null
 }
 
+function resolveStationName(raw) {
+  const address = buildAddress(raw)
+  const locationAddress = raw && raw.location && typeof raw.location.address === 'string'
+    ? raw.location.address
+    : ''
+  const candidates = [
+    raw && raw.name,
+    raw && raw.station_name,
+    raw && raw.stationName,
+    raw && raw.station && raw.station.name,
+    address.street,
+    raw && raw.location && raw.location.name,
+    locationAddress,
+    raw && raw.id
+  ]
+  const match = candidates.find((value) => typeof value === 'string' && value.trim().length > 0)
+  return match ? match.trim() : 'Unknown station'
+}
+
+function buildAddress(raw) {
+  const location = (raw && raw.location) || {}
+  const addressLine = typeof location.address === 'string' ? location.address : ''
+  const [addressStreet, ...addressRest] = addressLine
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  const street = raw.street || addressStreet || ''
+  const city = raw.city || (addressRest.length > 0 ? addressRest.join(', ') : '')
+  const zip = raw.zip || ''
+
+  return { street, city, zip }
+}
+
 function validateConfig(config) {
   if (config.method === 'nearby') {
     return toNumber(config.latitude) !== null && toNumber(config.longitude) !== null
@@ -95,6 +129,8 @@ function normalizeStation(raw, userLat, userLng) {
   const stationLng = toNumber(location.longitude)
   const userLatNum = toNumber(userLat)
   const userLngNum = toNumber(userLng)
+  const resolvedName = resolveStationName(raw)
+  const address = buildAddress(raw)
 
   let distance = null
   if (userLatNum !== null && userLngNum !== null && stationLat !== null && stationLng !== null) {
@@ -103,12 +139,8 @@ function normalizeStation(raw, userLat, userLng) {
 
   return {
     id: raw.id,
-    name: raw.name || raw.station_name || '',
-    address: {
-      street: raw.street || '',
-      city: raw.city || '',
-      zip: raw.zip || ''
-    },
+    name: resolvedName,
+    address,
     latitude: stationLat,
     longitude: stationLng,
     distance,
@@ -354,6 +386,24 @@ describe('Station normalisation', () => {
     assert.strictEqual(result.name, 'Fallback Name')
   })
 
+  test('falls back to location address and id when name fields are empty', () => {
+    const raw = {
+      id: 'no-name-id',
+      name: '',
+      station_name: '',
+      stationName: '',
+      station: { name: '' },
+      street: '',
+      city: '',
+      zip: '',
+      location: { latitude: 59.9, longitude: 10.7, address: 'Adressefelt 123, Oslo' },
+      prices: {}
+    }
+    const result = normalizeStation(raw, null, null)
+    assert.strictEqual(result.name, 'Adressefelt 123')
+    assert.deepStrictEqual(result.address, { street: 'Adressefelt 123', city: 'Oslo', zip: '' })
+  })
+
   test('preserves logo URL', () => {
     const raw = stationFixture
     const result = normalizeStation(raw, null, null)
@@ -389,6 +439,12 @@ describe('Station normalisation', () => {
     const raw = { id: 'zero', name: 'Zero', street: '', city: '', zip: '', logo: null, location: { latitude: 0, longitude: 0 }, prices: {} }
     const result = normalizeStation(raw, 0, 0)
     assert.strictEqual(result.distance, 0)
+  })
+
+  test('uses id as a final fallback when no naming data is available', () => {
+    const raw = { id: 'station-123', name: '', station_name: '', street: '', city: '', zip: '', logo: null, location: {}, prices: {} }
+    const result = normalizeStation(raw, null, null)
+    assert.strictEqual(result.name, 'station-123')
   })
 
   test('parses numeric string prices to numbers and ignores invalid ones', () => {
