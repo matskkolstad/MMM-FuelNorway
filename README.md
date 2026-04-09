@@ -101,6 +101,7 @@ Add the module to your `config/config.js`:
 - Configuration errors returned by the helper are now surfaced in the module UI to speed up troubleshooting.
 - `displayMode: 'list'` renders all stations inside a single card, keeping rows compact. Switch to `'grid'` for individual cards per station.
 - `moduleSize: 'small'` tightens padding and price chips to reduce whitespace on dense dashboards.
+- Stations are automatically sorted by the cheapest available price across your configured fuel types before applying `maxStations`, and cheapest highlights are calculated from the stations that are actually displayed.
 
 ### Layout tips
 

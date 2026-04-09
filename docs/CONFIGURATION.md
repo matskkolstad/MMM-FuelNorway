@@ -63,7 +63,7 @@ All available configuration options for the MMM-FuelNorway module.
 | `displayMode` | `string` | `'list'` | Layout mode: `'list'` (single card with station rows) or `'grid'` (one card per station) |
 | `orientation` | `string` | `'vertical'` | Item flow: `'vertical'` (stack details/prices) or `'horizontal'` (side-by-side details and prices) |
 | `moduleSize` | `string` | `'medium'` | Font/element size: `'small'` (compact padding), `'medium'`, or `'large'` |
-| `maxStations` | `number` | `5` | Maximum number of stations to display |
+| `maxStations` | `number` | `5` | Maximum number of stations to display — stations are sorted by the cheapest available price across your configured fuel types before this limit is applied |
 
 > In horizontal orientation, price chips stay on one line and will scroll horizontally if they don't fit the module width.
 
