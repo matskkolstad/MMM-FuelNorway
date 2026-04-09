@@ -47,13 +47,13 @@ All available configuration options for the MMM-FuelNorway module.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `method` | `string` | `'nearby'` | Fetch method: `'nearby'` (location-based) or `'manual'` (specific station IDs) |
-| `latitude` | `number` | `null` | Latitude for nearby search. **Required** when `method` is `'nearby'` |
-| `longitude` | `number` | `null` | Longitude for nearby search. **Required** when `method` is `'nearby'` |
-| `radius` | `number` | `5` | Search radius in kilometres for nearby method |
+| `latitude` | `number \| string` | `null` | Latitude for nearby search. Accepts numeric strings. **Required** when `method` is `'nearby'`; optional in `manual` mode to calculate distances. |
+| `longitude` | `number \| string` | `null` | Longitude for nearby search. Accepts numeric strings. **Required** when `method` is `'nearby'`; optional in `manual` mode to calculate distances. |
+| `radius` | `number \| string` | `5` | Search radius in kilometres for nearby method. Accepts numeric strings. |
 | `stationIds` | `string[]` | `[]` | Array of station IDs. **Required** when `method` is `'manual'` |
-| `updateInterval` | `number` | `900000` | Refresh interval in milliseconds (default: 15 minutes) |
-| `retryAttempts` | `number` | `3` | Number of retry attempts on API failure |
-| `retryDelay` | `number` | `5000` | Delay in milliseconds between retry attempts |
+| `updateInterval` | `number \| string` | `900000` | Refresh interval in milliseconds (default: 15 minutes). Accepts numeric strings. |
+| `retryAttempts` | `number \| string` | `3` | Number of retry attempts on API failure. Accepts numeric strings. |
+| `retryDelay` | `number \| string` | `5000` | Delay in milliseconds between retry attempts. Accepts numeric strings. |
 | `debug` | `boolean` | `false` | Enable debug logging to the console |
 
 ### Display

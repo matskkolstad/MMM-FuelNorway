@@ -39,7 +39,7 @@ Module.register('MMM-FuelNorway', {
   },
 
   getStyles() {
-    return ['MMM-FuelNorway.css']
+    return [this.file('css/MMM-FuelNorway.css')]
   },
 
   getTranslations() {
@@ -64,11 +64,15 @@ Module.register('MMM-FuelNorway', {
     if (this.updateTimer) {
       clearInterval(this.updateTimer)
     }
+    const configuredInterval = Number(this.config.updateInterval)
+    const interval = Number.isFinite(configuredInterval) && configuredInterval > 0
+      ? configuredInterval
+      : 15 * 60 * 1000
     this.updateTimer = setInterval(() => {
       this.loading = true
       this.updateDom()
       this.sendSocketNotification('FUELNORWAY_FETCH_DATA', this.config)
-    }, this.config.updateInterval)
+    }, interval)
   },
 
   socketNotificationReceived(notification, payload) {
@@ -99,7 +103,10 @@ Module.register('MMM-FuelNorway', {
     if (this.error) {
       const errorEl = document.createElement('div')
       errorEl.className = 'mmm-fuelnorway-error'
-      errorEl.textContent = this.translate('ERROR')
+      const message = this.error && typeof this.error.message === 'string' && this.error.message.length > 0
+        ? `: ${this.error.message}`
+        : ''
+      errorEl.textContent = `${this.translate('ERROR')}${message}`
       wrapper.appendChild(errorEl)
       return wrapper
     }
@@ -205,10 +212,10 @@ Module.register('MMM-FuelNorway', {
 
       const value = document.createElement('span')
       value.className = 'mmm-fuelnorway-fuel-value'
-      if (price !== null && price !== undefined) {
-        value.textContent = this.formatPrice(price)
-      } else {
-        value.textContent = '-'
+      const formattedPrice = this.formatPrice(price)
+      const hasPrice = formattedPrice !== '-'
+      value.textContent = formattedPrice
+      if (!hasPrice) {
         priceEl.classList.add('mmm-fuelnorway-unavailable')
       }
 
@@ -222,7 +229,8 @@ Module.register('MMM-FuelNorway', {
     if (this.config.showLastUpdated && station.last_updated) {
       const updated = document.createElement('div')
       updated.className = 'mmm-fuelnorway-updated'
-      updated.textContent = `${this.translate('LAST_UPDATED')}: ${this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)}`
+      const formattedTimestamp = this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)
+      updated.textContent = `${this.translate('LAST_UPDATED')}: ${formattedTimestamp || '-'}`
       el.appendChild(updated)
     }
 
@@ -241,8 +249,10 @@ Module.register('MMM-FuelNorway', {
   },
 
   formatPrice(price) {
-    if (price === null || price === undefined) return '-'
-    const formatted = Number(price).toFixed(this.config.decimalPlaces)
+    if (price === null || price === undefined || price === '') return '-'
+    const numeric = Number(price)
+    if (!Number.isFinite(numeric)) return '-'
+    const formatted = numeric.toFixed(this.config.decimalPlaces)
     if (this.config.compactPriceFormat) {
       return formatted
     }
@@ -252,6 +262,7 @@ Module.register('MMM-FuelNorway', {
   formatTimestamp(timestamp, format) {
     if (!timestamp) return ''
     const date = new Date(timestamp)
+    if (Number.isNaN(date.getTime())) return ''
     if (format === 'relative') {
       const diffMs = Date.now() - date.getTime()
       const diffMins = Math.floor(diffMs / 60000)
