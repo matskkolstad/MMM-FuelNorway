@@ -86,7 +86,9 @@ All available configuration options for the MMM-FuelNorway module.
 
 | Key | Description |
 |-----|-------------|
-| `gasoline_price` | Petrol / Gasoline |
+| `gasoline_price` | Regular petrol (same as 95 octane) |
+| `gasoline_95_price` | Petrol 95 octane |
+| `gasoline_98_price` | Petrol 98 octane |
 | `diesel_price` | Diesel |
 | `hvo100_price` | HVO100 (renewable diesel) |
 | `fd_price` | Fast charging (electric) |

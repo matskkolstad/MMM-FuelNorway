@@ -1,19 +1,38 @@
 {
-  "id": "circle-k-oslo-sentrum",
-  "name": "Circle K Oslo Sentrum",
-  "address": {
-    "street": "Grensen 5",
-    "city": "Oslo",
-    "zip": "0159"
+  "id": "j1i4da8bf8wkcql",
+  "name": "Fredensborg",
+  "brand": "1a4ese2pswjfp19",
+  "country": "Norway",
+  "location": {
+    "latitude": 59.92082191643188,
+    "longitude": 10.75106396077194,
+    "address": "Maridalsveien 10, 0178 Oslo",
+    "country": "Norway"
   },
-  "latitude": 59.9136,
-  "longitude": 10.7454,
-  "distance": 0.3,
-  "gasoline_price": 19.49,
-  "diesel_price": 18.79,
-  "hvo100_price": 21.99,
-  "fd_price": null,
-  "last_updated": "2024-03-15T08:30:00Z",
-  "logo": "https://cdn.drivstoffapp.no/logos/circle-k.png",
-  "amenities": ["shop", "car_wash", "cafe"]
+  "prices": {
+    "gasoline_price": 19.2,
+    "gasoline_95_price": 19.2,
+    "gasoline_98_price": null,
+    "diesel_price": 24.61,
+    "fd_price": null,
+    "hvo100_price": null,
+    "last_updated": "2026-04-09T11:03:29.295000Z"
+  },
+  "amenities": {
+    "services": null,
+    "amenities": null,
+    "opening_hours": null,
+    "phone": 0,
+    "rating": null,
+    "review_count": null
+  },
+  "station_name": "Fredensborg",
+  "description": "✅✅Success✅✅",
+  "logo": "https://drivstoffapp-db.valiantlynx.com/api/files/pbc_4040973964/1a4ese2pswjfp19/uno_x_ppf9f3vu9b.png",
+  "street": "Maridalsveien 10",
+  "city": "Oslo",
+  "zip": "0178",
+  "is_active": true,
+  "verified": false,
+  "closed": false
 }

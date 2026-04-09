@@ -1,59 +1,116 @@
 [
   {
-    "id": "circle-k-oslo-sentrum",
-    "name": "Circle K Oslo Sentrum",
-    "address": {
-      "street": "Grensen 5",
-      "city": "Oslo",
-      "zip": "0159"
+    "id": "j1i4da8bf8wkcql",
+    "name": "Fredensborg",
+    "brand": "1a4ese2pswjfp19",
+    "country": "Norway",
+    "location": {
+      "latitude": 59.92082191643188,
+      "longitude": 10.75106396077194,
+      "address": "Maridalsveien 10, 0178 Oslo",
+      "country": "Norway"
     },
-    "latitude": 59.9136,
-    "longitude": 10.7454,
-    "distance": 0.3,
-    "gasoline_price": 19.49,
-    "diesel_price": 18.79,
-    "hvo100_price": 21.99,
-    "fd_price": null,
-    "last_updated": "2024-03-15T08:30:00Z",
-    "logo": "https://cdn.drivstoffapp.no/logos/circle-k.png",
-    "amenities": ["shop", "car_wash", "cafe"]
+    "prices": {
+      "gasoline_price": 19.2,
+      "gasoline_95_price": 19.2,
+      "gasoline_98_price": null,
+      "diesel_price": 24.61,
+      "fd_price": null,
+      "hvo100_price": null,
+      "last_updated": "2026-04-09T11:03:29.295000Z"
+    },
+    "amenities": {
+      "services": null,
+      "amenities": null,
+      "opening_hours": null,
+      "phone": 0,
+      "rating": null,
+      "review_count": null
+    },
+    "station_name": "Fredensborg",
+    "description": "✅✅Success✅✅",
+    "logo": "https://drivstoffapp-db.valiantlynx.com/api/files/pbc_4040973964/1a4ese2pswjfp19/uno_x_ppf9f3vu9b.png",
+    "street": "Maridalsveien 10",
+    "city": "Oslo",
+    "zip": "0178",
+    "is_active": true,
+    "verified": false,
+    "closed": false
   },
   {
-    "id": "uno-x-gronland",
-    "name": "Uno-X Grønland",
-    "address": {
-      "street": "Schweigaardsgate 34",
-      "city": "Oslo",
-      "zip": "0191"
+    "id": "mw85fkdf8cq9b5n",
+    "name": "Trondheimsveien",
+    "brand": "b3vklilt0z4tdnv",
+    "country": "Norway",
+    "location": {
+      "latitude": 59.92231310683759,
+      "longitude": 10.771215797978972,
+      "address": "Trondheimsveien 61, 0560 Oslo",
+      "country": "Norway"
     },
-    "latitude": 59.9091,
-    "longitude": 10.7617,
-    "distance": 0.8,
-    "gasoline_price": 19.29,
-    "diesel_price": 18.59,
-    "hvo100_price": null,
-    "fd_price": null,
-    "last_updated": "2024-03-15T09:00:00Z",
-    "logo": "https://cdn.drivstoffapp.no/logos/uno-x.png",
-    "amenities": ["shop"]
+    "prices": {
+      "gasoline_price": 19.69,
+      "gasoline_95_price": 19.69,
+      "gasoline_98_price": null,
+      "diesel_price": 24.85,
+      "fd_price": null,
+      "hvo100_price": 99.99,
+      "last_updated": "2026-04-09T12:23:33.032000Z"
+    },
+    "amenities": {
+      "services": null,
+      "amenities": null,
+      "opening_hours": null,
+      "phone": 22970280,
+      "rating": null,
+      "review_count": null
+    },
+    "station_name": "Trondheimsveien",
+    "description": "✅✅Success✅✅",
+    "logo": "https://drivstoffapp-db.valiantlynx.com/api/files/pbc_4040973964/b3vklilt0z4tdnv/esso_auxiqz42ux.png",
+    "street": "Trondheimsveien 61",
+    "city": "Oslo",
+    "zip": "0560",
+    "is_active": true,
+    "verified": false,
+    "closed": false
   },
   {
-    "id": "esso-helsfyr",
-    "name": "Esso Helsfyr",
-    "address": {
-      "street": "Strømsveien 96",
-      "city": "Oslo",
-      "zip": "0663"
+    "id": "pzi8gsc9sy2796w",
+    "name": "Kiellands Plass",
+    "brand": "4lifm3pf8xx1qfu",
+    "country": "Norway",
+    "location": {
+      "latitude": 59.92873221882244,
+      "longitude": 10.749888330376983,
+      "address": "Uelands gate 55, 0175 Oslo",
+      "country": "Norway"
     },
-    "latitude": 59.9043,
-    "longitude": 10.7934,
-    "distance": 2.1,
-    "gasoline_price": 19.69,
-    "diesel_price": 18.99,
-    "hvo100_price": null,
-    "fd_price": 4.89,
-    "last_updated": "2024-03-15T07:45:00Z",
-    "logo": "https://cdn.drivstoffapp.no/logos/esso.png",
-    "amenities": ["shop", "electric_charger"]
+    "prices": {
+      "gasoline_price": 19.95,
+      "gasoline_95_price": 19.95,
+      "gasoline_98_price": null,
+      "diesel_price": 25.37,
+      "fd_price": null,
+      "hvo100_price": null,
+      "last_updated": "2026-04-09T13:23:05.545000Z"
+    },
+    "amenities": {
+      "services": null,
+      "amenities": null,
+      "opening_hours": null,
+      "phone": 22809850,
+      "rating": null,
+      "review_count": null
+    },
+    "station_name": "Kiellands Plass",
+    "description": "✅✅Success✅✅",
+    "logo": "https://drivstoffapp-db.valiantlynx.com/api/files/pbc_4040973964/4lifm3pf8xx1qfu/circle_k_6f6b22y9u5.png",
+    "street": "Uelands gate 55",
+    "city": "Oslo",
+    "zip": "0175",
+    "is_active": true,
+    "verified": false,
+    "closed": false
   }
 ]

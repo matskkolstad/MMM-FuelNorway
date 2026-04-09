@@ -267,6 +267,8 @@ Module.register('MMM-FuelNorway', {
   getFuelLabel(fuelType) {
     const map = {
       gasoline_price: this.translate('FUEL_GASOLINE'),
+      gasoline_95_price: this.translate('FUEL_GASOLINE_95'),
+      gasoline_98_price: this.translate('FUEL_GASOLINE_98'),
       diesel_price: this.translate('FUEL_DIESEL'),
       hvo100_price: this.translate('FUEL_HVO100'),
       fd_price: this.translate('FUEL_FD')

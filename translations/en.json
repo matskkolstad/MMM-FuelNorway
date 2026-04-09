@@ -5,6 +5,8 @@
   "LAST_UPDATED": "Updated",
   "CHEAPEST": "Best price",
   "FUEL_GASOLINE": "Petrol",
+  "FUEL_GASOLINE_95": "Petrol 95",
+  "FUEL_GASOLINE_98": "Petrol 98",
   "FUEL_DIESEL": "Diesel",
   "FUEL_HVO100": "HVO100",
   "FUEL_FD": "Electric",
