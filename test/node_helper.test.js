@@ -26,11 +26,12 @@ function resolveStationName(raw) {
   const address = buildAddress(raw)
   const locationAddress = raw && raw.location && typeof raw.location.address === 'string'
     ? raw.location.address
-    : ''
+    : (typeof raw.location === 'string' ? raw.location : '')
   const candidates = [
     raw && raw.name,
     raw && raw.station_name,
     raw && raw.stationName,
+    raw && raw.discountInfo,
     raw && raw.station && raw.station.name,
     address.street,
     raw && raw.location && raw.location.name,
@@ -43,7 +44,8 @@ function resolveStationName(raw) {
 
 function buildAddress(raw) {
   const location = (raw && raw.location) || {}
-  const addressLine = typeof location.address === 'string' ? location.address : ''
+  const locationString = typeof raw.location === 'string' ? raw.location : ''
+  const addressLine = typeof location.address === 'string' ? location.address : locationString
   const [addressStreet, ...addressRest] = addressLine
     .split(',')
     .map((part) => part.trim())
@@ -57,6 +59,7 @@ function buildAddress(raw) {
 }
 
 function validateConfig(config) {
+  if (!config.apiKey || String(config.apiKey).trim().length === 0) return false
   if (config.method === 'nearby') {
     return toNumber(config.latitude) !== null && toNumber(config.longitude) !== null
   }
@@ -66,17 +69,9 @@ function validateConfig(config) {
   return false
 }
 
-function buildNearbyUrl(config) {
-  const baseUrl = 'https://backend.drivstoffapp.no'
-  const lat = toNumber(config.latitude)
-  const lng = toNumber(config.longitude)
-  const radius = toNumber(config.radius) ?? 5
-  return `${baseUrl}/stations/fuel/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
-}
-
-function buildStationUrl(stationId) {
-  const baseUrl = 'https://backend.drivstoffapp.no'
-  return `${baseUrl}/stations/fuel/${stationId}`
+function buildStationsUrl(countryCode = 'NO') {
+  const baseUrl = 'https://api.drivstoffappen.no/api'
+  return `${baseUrl}/stations?stationType=0&countryCode=${countryCode}`
 }
 
 function isCacheValid(cache, cacheTime, updateInterval) {
@@ -123,10 +118,10 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 function normalizeStation(raw, userLat, userLng) {
-  const prices = (raw && raw.prices) || {}
+  const prices = extractPrices(raw)
   const location = (raw && raw.location) || {}
-  const stationLat = toNumber(location.latitude)
-  const stationLng = toNumber(location.longitude)
+  const stationLat = toNumber(location.latitude ?? raw.latitude)
+  const stationLng = toNumber(location.longitude ?? raw.longitude)
   const userLatNum = toNumber(userLat)
   const userLngNum = toNumber(userLng)
   const resolvedName = resolveStationName(raw)
@@ -144,72 +139,139 @@ function normalizeStation(raw, userLat, userLng) {
     latitude: stationLat,
     longitude: stationLng,
     distance,
-    gasoline_price: prices.gasoline_price !== undefined ? toNumber(prices.gasoline_price) : null,
-    gasoline_95_price: prices.gasoline_95_price !== undefined ? toNumber(prices.gasoline_95_price) : null,
-    gasoline_98_price: prices.gasoline_98_price !== undefined ? toNumber(prices.gasoline_98_price) : null,
-    diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
-    hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
-    fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
-    last_updated: prices.last_updated || null,
-    logo: raw.logo || null
+    gasoline_price: prices.gasoline_price,
+    gasoline_95_price: prices.gasoline_95_price,
+    gasoline_98_price: prices.gasoline_98_price,
+    diesel_price: prices.diesel_price,
+    hvo100_price: prices.hvo100_price,
+    fd_price: prices.fd_price,
+    last_updated: prices.last_updated,
+    logo: raw.logo || raw.pictureUrl || null
   }
+}
+
+function extractPrices(raw) {
+  const result = {
+    gasoline_price: null,
+    gasoline_95_price: null,
+    gasoline_98_price: null,
+    diesel_price: null,
+    hvo100_price: null,
+    fd_price: null,
+    last_updated: null
+  }
+
+  const updateLastUpdated = (value) => {
+    if (value === null || value === undefined) return
+    const numeric = toNumber(value)
+    const date = Number.isFinite(numeric) ? new Date(numeric) : new Date(value)
+    if (!Number.isNaN(date.getTime())) {
+      const iso = date.toISOString()
+      if (!result.last_updated || new Date(iso).getTime() > new Date(result.last_updated).getTime()) {
+        result.last_updated = iso
+      }
+    }
+  }
+
+  if (raw && raw.prices && typeof raw.prices === 'object') {
+    Object.assign(result, {
+      gasoline_price: raw.prices.gasoline_price !== undefined ? toNumber(raw.prices.gasoline_price) : null,
+      gasoline_95_price: raw.prices.gasoline_95_price !== undefined ? toNumber(raw.prices.gasoline_95_price) : null,
+      gasoline_98_price: raw.prices.gasoline_98_price !== undefined ? toNumber(raw.prices.gasoline_98_price) : null,
+      diesel_price: raw.prices.diesel_price !== undefined ? toNumber(raw.prices.diesel_price) : null,
+      hvo100_price: raw.prices.hvo100_price !== undefined ? toNumber(raw.prices.hvo100_price) : null,
+      fd_price: raw.prices.fd_price !== undefined ? toNumber(raw.prices.fd_price) : null,
+      last_updated: raw.prices.last_updated || null
+    })
+    updateLastUpdated(result.last_updated)
+  }
+
+  if (Array.isArray(raw && raw.stationDetails)) {
+    raw.stationDetails.forEach((detail) => {
+      const type = typeof detail.type === 'string' ? detail.type.toUpperCase() : String(detail.type || '').toUpperCase()
+      const price = toNumber(detail.price)
+      if (price === null) return
+      switch (type) {
+        case '95':
+          result.gasoline_95_price = price
+          break
+        case '98':
+          result.gasoline_98_price = price
+          break
+        case '100':
+        case 'HVO':
+        case 'HVO100':
+          result.hvo100_price = price
+          break
+        case 'FD':
+        case 'E':
+        case 'ELECTRIC':
+          result.fd_price = price
+          break
+        case 'D':
+        case 'DIESEL':
+        case 'EN590':
+          result.diesel_price = price
+          break
+        default:
+          break
+      }
+      updateLastUpdated(detail.lastUpdated || detail.last_updated)
+    })
+  }
+
+  if (result.gasoline_price === null) {
+    result.gasoline_price = result.gasoline_95_price ?? result.gasoline_98_price
+  }
+
+  return result
 }
 
 // ── Tests ──
 
 describe('Config validation', () => {
   test('validates nearby config requires latitude and longitude', () => {
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 10.7 }), true)
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 0, longitude: 0 }), true)
-    assert.strictEqual(validateConfig({ method: 'nearby' }), false)
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9 }), false)
-    assert.strictEqual(validateConfig({ method: 'nearby', longitude: 10.7 }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 10.7, apiKey: 'key' }), true)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 0, longitude: 0, apiKey: 'key' }), true)
+    assert.strictEqual(validateConfig({ method: 'nearby', apiKey: 'key' }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, apiKey: 'key' }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', longitude: 10.7, apiKey: 'key' }), false)
   })
 
   test('accepts numeric string lat/lng but rejects non-numeric', () => {
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: '59.9', longitude: '10.7' }), true)
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 'not-number', longitude: 10.7 }), false)
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 'ten' }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: '59.9', longitude: '10.7', apiKey: 'key' }), true)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 'not-number', longitude: 10.7, apiKey: 'key' }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 'ten', apiKey: 'key' }), false)
   })
 
   test('validates manual config requires stationIds array', () => {
-    assert.strictEqual(validateConfig({ method: 'manual', stationIds: ['abc', 'def'] }), true)
-    assert.strictEqual(validateConfig({ method: 'manual', stationIds: ['single'] }), true)
-    assert.strictEqual(validateConfig({ method: 'manual', stationIds: [] }), false)
-    assert.strictEqual(validateConfig({ method: 'manual' }), false)
-    assert.strictEqual(validateConfig({ method: 'manual', stationIds: 'not-an-array' }), false)
+    assert.strictEqual(validateConfig({ method: 'manual', stationIds: ['abc', 'def'], apiKey: 'key' }), true)
+    assert.strictEqual(validateConfig({ method: 'manual', stationIds: ['single'], apiKey: 'key' }), true)
+    assert.strictEqual(validateConfig({ method: 'manual', stationIds: [], apiKey: 'key' }), false)
+    assert.strictEqual(validateConfig({ method: 'manual', apiKey: 'key' }), false)
+    assert.strictEqual(validateConfig({ method: 'manual', stationIds: 'not-an-array', apiKey: 'key' }), false)
   })
 
   test('returns false for unknown method', () => {
-    assert.strictEqual(validateConfig({ method: 'unknown' }), false)
+    assert.strictEqual(validateConfig({ method: 'unknown', apiKey: 'key' }), false)
     assert.strictEqual(validateConfig({}), false)
+  })
+
+  test('requires apiKey for all methods', () => {
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 10.7 }), false)
+    assert.strictEqual(validateConfig({ method: 'manual', stationIds: ['1'] }), false)
   })
 })
 
 describe('URL building', () => {
-  test('builds nearby URL with default radius', () => {
-    const result = buildNearbyUrl({ latitude: 59.9139, longitude: 10.7522 })
-    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/nearby?lat=59.9139&lng=10.7522&radius=5')
+  test('builds stations URL with default country code', () => {
+    const result = buildStationsUrl('NO')
+    assert.strictEqual(result, 'https://api.drivstoffappen.no/api/stations?stationType=0&countryCode=NO')
   })
 
-  test('builds nearby URL with custom radius', () => {
-    const result = buildNearbyUrl({ latitude: 59.9139, longitude: 10.7522, radius: 10 })
-    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/nearby?lat=59.9139&lng=10.7522&radius=10')
-  })
-
-  test('builds station URL', () => {
-    const result = buildStationUrl('circle-k-oslo')
-    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/circle-k-oslo')
-  })
-
-  test('builds station URL for numeric id', () => {
-    const result = buildStationUrl(12345)
-    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/12345')
-  })
-
-  test('builds nearby URL when lat/lng and radius are numeric strings', () => {
-    const result = buildNearbyUrl({ latitude: '59.9139', longitude: '10.7522', radius: '7' })
-    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/nearby?lat=59.9139&lng=10.7522&radius=7')
+  test('builds stations URL with custom country code', () => {
+    const result = buildStationsUrl('SE')
+    assert.strictEqual(result, 'https://api.drivstoffappen.no/api/stations?stationType=0&countryCode=SE')
   })
 })
 
@@ -345,7 +407,7 @@ describe('Station normalisation', () => {
   test('extracts last_updated from nested prices', () => {
     const raw = stationFixture
     const result = normalizeStation(raw, null, null)
-    assert.strictEqual(result.last_updated, '2026-04-09T11:03:29.295000Z')
+    assert.strictEqual(result.last_updated, '2025-04-09T11:03:29.295Z')
   })
 
   test('builds address object from flat street/city/zip fields', () => {
@@ -354,7 +416,7 @@ describe('Station normalisation', () => {
     assert.deepStrictEqual(result.address, { street: 'Maridalsveien 10', city: 'Oslo', zip: '0178' })
   })
 
-  test('extracts lat/lng from nested location object', () => {
+  test('extracts lat/lng from station object', () => {
     const raw = stationFixture
     const result = normalizeStation(raw, null, null)
     assert.ok(Math.abs(result.latitude - 59.92082191643188) < 0.000001)
@@ -381,7 +443,7 @@ describe('Station normalisation', () => {
   })
 
   test('falls back to station_name when name is missing', () => {
-    const raw = { ...stationFixture, name: '', station_name: 'Fallback Name', prices: {}, location: {} }
+    const raw = { ...stationFixture, name: '', station_name: 'Fallback Name', stationDetails: [], location: {} }
     const result = normalizeStation(raw, null, null)
     assert.strictEqual(result.name, 'Fallback Name')
   })
@@ -397,7 +459,7 @@ describe('Station normalisation', () => {
       city: '',
       zip: '',
       location: { latitude: 59.9, longitude: 10.7, address: 'Adressefelt 123, Oslo' },
-      prices: {}
+      stationDetails: []
     }
     const result = normalizeStation(raw, null, null)
     assert.strictEqual(result.name, 'Adressefelt 123')
@@ -407,11 +469,11 @@ describe('Station normalisation', () => {
   test('preserves logo URL', () => {
     const raw = stationFixture
     const result = normalizeStation(raw, null, null)
-    assert.ok(result.logo && result.logo.startsWith('https://'))
+    assert.ok(result.logo && result.logo.includes('valiantlynx.com'))
   })
 
   test('sets logo to null when absent', () => {
-    const raw = { ...stationFixture, logo: null, prices: {}, location: {} }
+    const raw = { ...stationFixture, logo: null, pictureUrl: null, stationDetails: [], location: {} }
     const result = normalizeStation(raw, null, null)
     assert.strictEqual(result.logo, null)
   })
@@ -428,7 +490,7 @@ describe('Station normalisation', () => {
   })
 
   test('handles station with no prices gracefully', () => {
-    const raw = { id: 'x', name: 'Empty', street: '', city: '', zip: '', logo: null, location: {} }
+    const raw = { id: 'x', name: 'Empty', street: '', city: '', zip: '', logo: null, stationDetails: [], location: {} }
     const result = normalizeStation(raw, null, null)
     assert.strictEqual(result.gasoline_price, null)
     assert.strictEqual(result.diesel_price, null)
@@ -436,13 +498,13 @@ describe('Station normalisation', () => {
   })
 
   test('calculates distance when coordinates are zero', () => {
-    const raw = { id: 'zero', name: 'Zero', street: '', city: '', zip: '', logo: null, location: { latitude: 0, longitude: 0 }, prices: {} }
+    const raw = { id: 'zero', name: 'Zero', street: '', city: '', zip: '', logo: null, location: { latitude: 0, longitude: 0 }, stationDetails: [] }
     const result = normalizeStation(raw, 0, 0)
     assert.strictEqual(result.distance, 0)
   })
 
   test('uses id as a final fallback when no naming data is available', () => {
-    const raw = { id: 'station-123', name: '', station_name: '', street: '', city: '', zip: '', logo: null, location: {}, prices: {} }
+    const raw = { id: 'station-123', name: '', station_name: '', street: '', city: '', zip: '', logo: null, location: {}, stationDetails: [] }
     const result = normalizeStation(raw, null, null)
     assert.strictEqual(result.name, 'station-123')
   })
@@ -456,7 +518,10 @@ describe('Station normalisation', () => {
       zip: '',
       logo: null,
       location: { latitude: '59.9', longitude: '10.7' },
-      prices: { gasoline_price: '19.55', diesel_price: 'bad-data' }
+      stationDetails: [
+        { type: '95', price: '19.55', lastUpdated: '2026-04-09T12:00:00Z' },
+        { type: 'D', price: 'bad-data', lastUpdated: '2026-04-09T12:00:00Z' }
+      ]
     }
     const result = normalizeStation(raw, '59.9', '10.7')
     assert.strictEqual(result.gasoline_price, 19.55)

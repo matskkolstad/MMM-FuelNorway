@@ -14,6 +14,8 @@ Module.register('MMM-FuelNorway', {
     orientation: 'vertical',
     moduleSize: 'medium',
     fuelTypes: ['gasoline_price', 'diesel_price'],
+    apiKey: null,
+    countryCode: 'NO',
     showStationName: true,
     showAddress: true,
     addressFormat: 'street',

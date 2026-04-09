@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2026-04-09
+
+### Fixed
+
+- Updated API integration to use the new Drivstoffappen stations endpoint (`api.drivstoffappen.no`) with required `X-API-KEY` authentication. Requests now derive prices from `stationDetails` and continue to support nearby/manual filtering and caching.
+- Added `apiKey`/`countryCode` configuration options and documentation updates to reflect the new API requirements.
+
+---
+
 ## [1.1.0] - 2026-04-09
 
 ### Fixed

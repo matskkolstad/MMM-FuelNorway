@@ -16,13 +16,15 @@ All available configuration options for the MMM-FuelNorway module.
     stationIds: [],
     updateInterval: 15 * 60 * 1000,
     retryDelay: 5000,
-    retryAttempts: 3,
-    displayMode: 'list',
-    orientation: 'vertical',
-    moduleSize: 'medium',
-    fuelTypes: ['gasoline_price', 'diesel_price'],
-    showStationName: true,
-    showAddress: true,
+  retryAttempts: 3,
+  displayMode: 'list',
+  orientation: 'vertical',
+  moduleSize: 'medium',
+  fuelTypes: ['gasoline_price', 'diesel_price'],
+  apiKey: null,
+  countryCode: 'NO',
+  showStationName: true,
+  showAddress: true,
     addressFormat: 'street',
     showLastUpdated: true,
     lastUpdatedFormat: 'relative',
@@ -51,6 +53,8 @@ All available configuration options for the MMM-FuelNorway module.
 | `longitude` | `number \| string` | `null` | Longitude for nearby search. Accepts numeric strings. **Required** when `method` is `'nearby'`; optional in `manual` mode to calculate distances. |
 | `radius` | `number \| string` | `5` | Search radius in kilometres for nearby method. Accepts numeric strings. |
 | `stationIds` | `string[]` | `[]` | Array of station IDs. **Required** when `method` is `'manual'` |
+| `apiKey` | `string` | `null` | **Required.** Drivstoffappen API key passed as `X-API-KEY` header. Requests are rejected without it. |
+| `countryCode` | `string` | `'NO'` | Country code for the Drivstoffappen stations endpoint. |
 | `updateInterval` | `number \| string` | `900000` | Refresh interval in milliseconds (default: 15 minutes). Accepts numeric strings. |
 | `retryAttempts` | `number \| string` | `3` | Number of retry attempts on API failure. Accepts numeric strings. |
 | `retryDelay` | `number \| string` | `5000` | Delay in milliseconds between retry attempts. Accepts numeric strings. |

@@ -1,6 +1,6 @@
 {
   "name": "mmm-fuelnorway",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "MagicMirror² module displaying Norwegian fuel prices via the Drivstoff App API",
   "main": "MMM-FuelNorway.js",
   "scripts": {

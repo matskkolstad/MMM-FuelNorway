@@ -18,6 +18,8 @@ const defaults = {
   orientation: 'vertical',
   moduleSize: 'medium',
   fuelTypes: ['gasoline_price', 'diesel_price'],
+  apiKey: null,
+  countryCode: 'NO',
   showStationName: true,
   showAddress: true,
   addressFormat: 'street',
@@ -151,6 +153,14 @@ describe('Default configuration', () => {
 
   test('highlightCheapest is true by default', () => {
     assert.strictEqual(defaults.highlightCheapest, true)
+  })
+
+  test('apiKey is null by default', () => {
+    assert.strictEqual(defaults.apiKey, null)
+  })
+
+  test('countryCode defaults to NO', () => {
+    assert.strictEqual(defaults.countryCode, 'NO')
   })
 
   test('debug is false by default', () => {

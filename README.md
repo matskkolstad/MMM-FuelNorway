@@ -1,6 +1,8 @@
 # MMM-FuelNorway
 
-A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwegian fuel prices using the [Drivstoff App](https://www.drivstoffapp.no/) API. Find nearby stations automatically or configure specific stations by ID — with support for petrol, diesel, HVO100, and electric fast-charging prices.
+A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwegian fuel prices using the [Drivstoffappen](https://www.drivstoffappen.no/) API. Find nearby stations automatically or configure specific stations by ID — with support for petrol, diesel, HVO100, and electric fast-charging prices.  
+
+**Note:** Drivstoffappen now requires an API key. Add your key to the module config via `apiKey`. The module will refuse to fetch data without it.
 
 ---
 
@@ -131,25 +133,24 @@ See [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) for the complete reference 
 
 ## Finding Station IDs
 
-Station IDs are provided by the Drivstoff App API. You can find them by making a nearby request manually:
+Station IDs are provided by the Drivstoffappen API. You can find them by calling the stations endpoint with your API key:
 
 ```
-GET https://backend.drivstoffapp.no/stations/fuel/nearby?lat=59.9139&lng=10.7522&radius=5
+GET https://api.drivstoffappen.no/api/stations?stationType=0&countryCode=NO
+X-API-KEY: <your-api-key>
 ```
 
-Each station object in the response contains an `id` field — use that value in your `stationIds` array.
+Each station object in the response contains an `id` field — use that value in your `stationIds` array. Filter client-side by latitude/longitude and radius if you only want nearby stations.
 
 ---
 
 ## API Integration Notes
 
-- **Base URL:** `https://backend.drivstoffapp.no`
-- **Nearby endpoint:** `GET /stations/fuel/nearby?lat={lat}&lng={lng}&radius={km}`
-- **Single station:** `GET /stations/fuel/{station_id}`
-- No authentication required for public endpoints
-- Prices are returned nested under `station.prices.*`; the module normalises these automatically
-- The module respects the `updateInterval` and will not make duplicate requests within that window (caching)
-- Station distance is calculated using the Haversine formula (the API does not return a distance field)
+- **Base URL:** `https://api.drivstoffappen.no/api`
+- **Stations endpoint:** `GET /stations?stationType=0&countryCode=NO` (requires `X-API-KEY`)
+- The API returns an array of stations with `stationDetails` price entries (`type` values like `95`, `98`, `D`, `FD`, `100`). The module maps these to its `gasoline_*`, `diesel_price`, `fd_price`, and `hvo100_price` fields.
+- The module filters stations client-side for the configured radius/IDs and caches results for `updateInterval` to avoid duplicate requests.
+- Station distance is calculated using the Haversine formula (the API does not return a distance field).
 
 ### API response structure (summary)
 

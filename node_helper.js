@@ -3,7 +3,7 @@
 const NodeHelper = require('node_helper')
 const https = require('https')
 
-const BASE_URL = 'https://backend.drivstoffapp.no'
+const BASE_URL = 'https://api.drivstoffappen.no/api'
 
 const toNumber = (value) => {
   if (value === null || value === undefined || value === '') return null
@@ -35,6 +35,7 @@ module.exports = NodeHelper.create({
     const updateInterval = toNumber(config.updateInterval)
     const retryAttempts = toNumber(config.retryAttempts)
     const retryDelay = toNumber(config.retryDelay)
+    const apiKey = typeof config.apiKey === 'string' && config.apiKey.trim().length > 0 ? config.apiKey.trim() : null
     const normalizedConfig = {
       ...config,
       latitude: toNumber(config.latitude),
@@ -42,7 +43,9 @@ module.exports = NodeHelper.create({
       radius: toNumber(config.radius) ?? 5,
       updateInterval: updateInterval ?? 15 * 60 * 1000,
       retryAttempts: retryAttempts ?? 3,
-      retryDelay: retryDelay ?? 5000
+      retryDelay: retryDelay ?? 5000,
+      apiKey,
+      countryCode: (config.countryCode || 'NO').toUpperCase()
     }
     this.config = normalizedConfig
 
@@ -54,32 +57,39 @@ module.exports = NodeHelper.create({
       return
     }
 
-    if (config.method === 'nearby') {
-      if (normalizedConfig.latitude === null || normalizedConfig.longitude === null) {
-        this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: latitude and longitude required for nearby method' })
-        return
-      }
-      this.fetchNearby(normalizedConfig)
-    } else if (config.method === 'manual') {
-      if (!Array.isArray(config.stationIds) || config.stationIds.length === 0) {
-        this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: stationIds array required for manual method' })
-        return
-      }
-      this.fetchMultipleStations(normalizedConfig)
-    } else {
-      this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Unknown method: ${config.method}` })
+    if (!apiKey) {
+      this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: apiKey is required for Drivstoffappen API' })
+      return
     }
+
+    if (config.method === 'nearby' && (normalizedConfig.latitude === null || normalizedConfig.longitude === null)) {
+      this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: latitude and longitude required for nearby method' })
+      return
+    }
+
+    if (config.method === 'manual' && (!Array.isArray(config.stationIds) || config.stationIds.length === 0)) {
+      this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: stationIds array required for manual method' })
+      return
+    }
+
+    if (config.method !== 'nearby' && config.method !== 'manual') {
+      this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Unknown method: ${config.method}` })
+      return
+    }
+
+    this.fetchStations(normalizedConfig)
   },
 
   resolveStationName(raw) {
     const address = this.buildAddress(raw)
     const locationAddress = raw && raw.location && typeof raw.location.address === 'string'
       ? raw.location.address
-      : ''
+      : (typeof raw.location === 'string' ? raw.location : '')
     const candidates = [
       raw && raw.name,
       raw && raw.station_name,
       raw && raw.stationName,
+      raw && raw.discountInfo,
       raw && raw.station && raw.station.name,
       address.street,
       raw && raw.location && raw.location.name,
@@ -92,7 +102,8 @@ module.exports = NodeHelper.create({
 
   buildAddress(raw) {
     const location = (raw && raw.location) || {}
-    const addressLine = typeof location.address === 'string' ? location.address : ''
+    const locationString = typeof raw.location === 'string' ? raw.location : ''
+    const addressLine = typeof location.address === 'string' ? location.address : locationString
     const [addressStreet, ...addressRest] = addressLine
       .split(',')
       .map((part) => part.trim())
@@ -105,14 +116,92 @@ module.exports = NodeHelper.create({
     return { street, city, zip }
   },
 
+  extractPrices(raw) {
+    const result = {
+      gasoline_price: null,
+      gasoline_95_price: null,
+      gasoline_98_price: null,
+      diesel_price: null,
+      hvo100_price: null,
+      fd_price: null,
+      last_updated: null
+    }
+
+    const updateLastUpdated = (value) => {
+      if (value === null || value === undefined) return
+      const numeric = toNumber(value)
+      const date = Number.isFinite(numeric) ? new Date(numeric) : new Date(value)
+      if (!Number.isNaN(date.getTime())) {
+        const iso = date.toISOString()
+        if (!result.last_updated || new Date(iso).getTime() > new Date(result.last_updated).getTime()) {
+          result.last_updated = iso
+        }
+      }
+    }
+
+    if (raw && raw.prices && typeof raw.prices === 'object') {
+      Object.assign(result, {
+        gasoline_price: raw.prices.gasoline_price !== undefined ? toNumber(raw.prices.gasoline_price) : null,
+        gasoline_95_price: raw.prices.gasoline_95_price !== undefined ? toNumber(raw.prices.gasoline_95_price) : null,
+        gasoline_98_price: raw.prices.gasoline_98_price !== undefined ? toNumber(raw.prices.gasoline_98_price) : null,
+        diesel_price: raw.prices.diesel_price !== undefined ? toNumber(raw.prices.diesel_price) : null,
+        hvo100_price: raw.prices.hvo100_price !== undefined ? toNumber(raw.prices.hvo100_price) : null,
+        fd_price: raw.prices.fd_price !== undefined ? toNumber(raw.prices.fd_price) : null,
+        last_updated: raw.prices.last_updated || null
+      })
+      updateLastUpdated(result.last_updated)
+    }
+
+    if (Array.isArray(raw && raw.stationDetails)) {
+      raw.stationDetails.forEach((detail) => {
+        const type = typeof detail.type === 'string' ? detail.type.toUpperCase() : String(detail.type || '').toUpperCase()
+        const price = toNumber(detail.price)
+        if (price === null) return
+        switch (type) {
+          case '95':
+            result.gasoline_95_price = price
+            break
+          case '98':
+            result.gasoline_98_price = price
+            break
+          case '100':
+          case 'HVO':
+          case 'HVO100':
+            result.hvo100_price = price
+            break
+          case 'FD':
+          case 'E':
+          case 'ELECTRIC':
+            result.fd_price = price
+            break
+          case 'D':
+          case 'DIESEL':
+          case 'EN590':
+            result.diesel_price = price
+            break
+          default:
+            // Unknown type, ignore
+            break
+        }
+        updateLastUpdated(detail.lastUpdated || detail.last_updated)
+      })
+    }
+
+    if (result.gasoline_price === null) {
+      result.gasoline_price = result.gasoline_95_price ?? result.gasoline_98_price
+    }
+
+    return result
+  },
+
   // Normalise a raw API station object into the flat format the front-end expects.
   // The real API nests prices under station.prices and the address as separate flat
   // fields (street / city / zip), so we flatten everything here.
   normalizeStation(raw, userLat, userLng) {
-    const prices = (raw && raw.prices) || {}
+    const prices = this.extractPrices(raw)
     const location = (raw && raw.location) || {}
-    const stationLat = toNumber(location.latitude)
-    const stationLng = toNumber(location.longitude)
+    const stationLat = toNumber(location.latitude ?? raw.latitude)
+    const stationLng = toNumber(location.longitude ?? raw.longitude)
     const userLatNum = toNumber(userLat)
     const userLngNum = toNumber(userLng)
     const resolvedName = this.resolveStationName(raw)
@@ -130,14 +219,14 @@ module.exports = NodeHelper.create({
       latitude: stationLat,
       longitude: stationLng,
       distance,
-      gasoline_price: prices.gasoline_price !== undefined ? toNumber(prices.gasoline_price) : null,
-      gasoline_95_price: prices.gasoline_95_price !== undefined ? toNumber(prices.gasoline_95_price) : null,
-      gasoline_98_price: prices.gasoline_98_price !== undefined ? toNumber(prices.gasoline_98_price) : null,
-      diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
-      hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
-      fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
-      last_updated: prices.last_updated || null,
-      logo: raw.logo || null
+      gasoline_price: prices.gasoline_price,
+      gasoline_95_price: prices.gasoline_95_price,
+      gasoline_98_price: prices.gasoline_98_price,
+      diesel_price: prices.diesel_price,
+      hvo100_price: prices.hvo100_price,
+      fd_price: prices.fd_price,
+      last_updated: prices.last_updated,
+      logo: raw.logo || raw.pictureUrl || null
     }
   },
 
@@ -153,26 +242,25 @@ module.exports = NodeHelper.create({
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   },
 
-  fetchNearby(config, attempt) {
-    attempt = attempt || 1
-    const radius = config.radius ?? 5
-    const endpoint = `${BASE_URL}/stations/fuel/nearby?lat=${config.latitude}&lng=${config.longitude}&radius=${radius}`
+  fetchStations(config, attempt = 1) {
+    const endpoint = `${BASE_URL}/stations?stationType=0&countryCode=${encodeURIComponent(config.countryCode)}`
 
     if (config.debug) {
-      console.log(`[MMM-FuelNorway] Fetching nearby: ${endpoint} (attempt ${attempt})`)
+      console.log(`[MMM-FuelNorway] Fetching stations: ${endpoint} (attempt ${attempt})`)
     }
 
-    this.httpsGet(endpoint, (err, data) => {
+    this.httpsGet(endpoint, config, (err, data) => {
       if (err) {
         const retryAttempts = config.retryAttempts ?? 3
         if (attempt < retryAttempts) {
           console.log(`[MMM-FuelNorway] Retry ${attempt}/${retryAttempts} after error: ${err.message}`)
-          setTimeout(() => this.fetchNearby(config, attempt + 1), config.retryDelay ?? 5000)
+          setTimeout(() => this.fetchStations(config, attempt + 1), config.retryDelay ?? 5000)
         } else {
           this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
         }
         return
       }
+
       let stations
       try {
         stations = JSON.parse(data)
@@ -180,73 +268,37 @@ module.exports = NodeHelper.create({
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Failed to parse API response' })
         return
       }
+
       if (!Array.isArray(stations)) {
-        stations = [stations]
+        stations = stations ? [stations] : []
       }
-      const normalized = stations.map((s) => this.normalizeStation(s, config.latitude, config.longitude))
-      this.cache = normalized
+
+      const normalized = stations
+        .map((s) => this.normalizeStation(s, config.latitude, config.longitude))
+        .filter(Boolean)
+
+      let result
+      if (config.method === 'nearby') {
+        result = normalized
+          .filter((s) => s.distance !== null && s.distance <= (config.radius ?? 5))
+          .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      } else {
+        const idSet = new Set((config.stationIds || []).map((id) => String(id)))
+        result = normalized.filter((s) => idSet.has(String(s.id)))
+      }
+
+      if (!result || result.length === 0) {
+        this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'No stations found for the provided criteria' })
+        return
+      }
+
+      this.cache = result
       this.cacheTime = Date.now()
-      this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
+      this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', result)
     })
   },
 
-  fetchStation(stationId, callback, attempt) {
-    attempt = attempt || 1
-    const endpoint = `${BASE_URL}/stations/fuel/${stationId}`
-
-    if (this.config && this.config.debug) {
-      console.log(`[MMM-FuelNorway] Fetching station ${stationId}: ${endpoint}`)
-    }
-
-    this.httpsGet(endpoint, (err, data) => {
-      if (err) {
-        const retryAttempts = (this.config && this.config.retryAttempts) ?? 3
-        if (attempt < retryAttempts) {
-          setTimeout(() => this.fetchStation(stationId, callback, attempt + 1), (this.config && this.config.retryDelay) ?? 5000)
-        } else {
-          callback(err, null)
-        }
-        return
-      }
-      let station
-      try {
-        station = JSON.parse(data)
-      } catch (_e) {
-        callback(new Error('Failed to parse station response'), null)
-        return
-      }
-      callback(null, station)
-    })
-  },
-
-  fetchMultipleStations(config) {
-    const ids = config.stationIds
-    const stationPromises = ids.map(
-      (stationId) =>
-        new Promise((resolve, reject) => {
-          this.fetchStation(stationId, (err, station) => {
-            if (err) {
-              reject(new Error(`Failed to fetch station ${stationId}: ${err.message}`))
-              return
-            }
-            resolve(station)
-          })
-        })
-    )
-
-    Promise.all(stationPromises)
-      .then((stations) => {
-        const normalized = stations.map((station) => this.normalizeStation(station, config.latitude, config.longitude))
-        this.cache = normalized
-        this.cacheTime = Date.now()
-        this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
-      })
-      .catch((err) => {
-        this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
-      })
-  },
-
-  httpsGet(endpoint, callback) {
+  httpsGet(endpoint, config, callback) {
     const parsedUrl = new URL(endpoint)
     const options = {
       hostname: parsedUrl.hostname,
@@ -254,8 +306,12 @@ module.exports = NodeHelper.create({
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'MMM-FuelNorway/1.0.0'
+        'User-Agent': 'MMM-FuelNorway/1.1.1'
       }
+    }
+
+    if (config && config.apiKey) {
+      options.headers['X-API-KEY'] = config.apiKey
     }
 
     const req = https.request(options, (res) => {
