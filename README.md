@@ -23,7 +23,7 @@ A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwe
 
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/YOUR_USERNAME/MMM-FuelNorway.git
+git clone https://github.com/matskkolstad/MMM-FuelNorway.git
 cd MMM-FuelNorway
 npm install
 ```
@@ -98,7 +98,7 @@ Add the module to your `config/config.js`:
   position: 'top_right',
   config: {
     method: 'manual',
-    stationIds: ['circle-k-oslo-sentrum', 'uno-x-gronland'],
+    stationIds: ['ewf1ni1aituz3xc', '2bc5fi4pdadlnc1'],
     displayMode: 'grid',
     fuelTypes: ['gasoline_price', 'diesel_price', 'hvo100_price']
   }
