@@ -5,6 +5,12 @@ const https = require('https')
 
 const BASE_URL = 'https://backend.drivstoffapp.no'
 
+const toNumber = (value) => {
+  if (value === null || value === undefined || value === '') return null
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
 module.exports = NodeHelper.create({
   start() {
     console.log(`[MMM-FuelNorway] Node helper started`)
@@ -15,14 +21,6 @@ module.exports = NodeHelper.create({
 
   socketNotificationReceived(notification, payload) {
     if (notification === 'FUELNORWAY_FETCH_DATA') {
-      this.config = payload
-      if (this.isCacheValid()) {
-        if (this.config.debug) {
-          console.log('[MMM-FuelNorway] Serving from cache')
-        }
-        this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', this.cache)
-        return
-      }
       this.fetchData(payload)
     }
   },
@@ -30,22 +28,44 @@ module.exports = NodeHelper.create({
   isCacheValid() {
     if (!this.cache || !this.cacheTime || !this.config) return false
     const age = Date.now() - this.cacheTime
-    return age < (this.config.updateInterval || 15 * 60 * 1000)
+    return age < (this.config.updateInterval ?? 15 * 60 * 1000)
   },
 
   fetchData(config) {
+    const updateInterval = toNumber(config.updateInterval)
+    const retryAttempts = toNumber(config.retryAttempts)
+    const retryDelay = toNumber(config.retryDelay)
+    const normalizedConfig = {
+      ...config,
+      latitude: toNumber(config.latitude),
+      longitude: toNumber(config.longitude),
+      radius: toNumber(config.radius) ?? 5,
+      updateInterval: updateInterval ?? 15 * 60 * 1000,
+      retryAttempts: retryAttempts ?? 3,
+      retryDelay: retryDelay ?? 5000
+    }
+    this.config = normalizedConfig
+
+    if (this.isCacheValid()) {
+      if (this.config.debug) {
+        console.log('[MMM-FuelNorway] Serving from cache')
+      }
+      this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', this.cache)
+      return
+    }
+
     if (config.method === 'nearby') {
-      if (typeof config.latitude !== 'number' || typeof config.longitude !== 'number') {
+      if (normalizedConfig.latitude === null || normalizedConfig.longitude === null) {
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: latitude and longitude required for nearby method' })
         return
       }
-      this.fetchNearby(config)
+      this.fetchNearby(normalizedConfig)
     } else if (config.method === 'manual') {
       if (!Array.isArray(config.stationIds) || config.stationIds.length === 0) {
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: stationIds array required for manual method' })
         return
       }
-      this.fetchMultipleStations(config)
+      this.fetchMultipleStations(normalizedConfig)
     } else {
       this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Unknown method: ${config.method}` })
     }
@@ -57,12 +77,14 @@ module.exports = NodeHelper.create({
   normalizeStation(raw, userLat, userLng) {
     const prices = (raw && raw.prices) || {}
     const location = (raw && raw.location) || {}
-    const stationLat = location.latitude || null
-    const stationLng = location.longitude || null
+    const stationLat = toNumber(location.latitude)
+    const stationLng = toNumber(location.longitude)
+    const userLatNum = toNumber(userLat)
+    const userLngNum = toNumber(userLng)
 
     let distance = null
-    if (typeof userLat === 'number' && typeof userLng === 'number' && stationLat && stationLng) {
-      distance = Math.round(this.haversineDistance(userLat, userLng, stationLat, stationLng) * 10) / 10
+    if (userLatNum !== null && userLngNum !== null && stationLat !== null && stationLng !== null) {
+      distance = Math.round(this.haversineDistance(userLatNum, userLngNum, stationLat, stationLng) * 10) / 10
     }
 
     return {
@@ -76,12 +98,12 @@ module.exports = NodeHelper.create({
       latitude: stationLat,
       longitude: stationLng,
       distance,
-      gasoline_price: prices.gasoline_price !== undefined ? prices.gasoline_price : null,
-      gasoline_95_price: prices.gasoline_95_price !== undefined ? prices.gasoline_95_price : null,
-      gasoline_98_price: prices.gasoline_98_price !== undefined ? prices.gasoline_98_price : null,
-      diesel_price: prices.diesel_price !== undefined ? prices.diesel_price : null,
-      hvo100_price: prices.hvo100_price !== undefined ? prices.hvo100_price : null,
-      fd_price: prices.fd_price !== undefined ? prices.fd_price : null,
+      gasoline_price: prices.gasoline_price !== undefined ? toNumber(prices.gasoline_price) : null,
+      gasoline_95_price: prices.gasoline_95_price !== undefined ? toNumber(prices.gasoline_95_price) : null,
+      gasoline_98_price: prices.gasoline_98_price !== undefined ? toNumber(prices.gasoline_98_price) : null,
+      diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
+      hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
+      fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
       last_updated: prices.last_updated || null,
       logo: raw.logo || null
     }
@@ -101,7 +123,7 @@ module.exports = NodeHelper.create({
 
   fetchNearby(config, attempt) {
     attempt = attempt || 1
-    const radius = config.radius || 5
+    const radius = config.radius ?? 5
     const endpoint = `${BASE_URL}/stations/fuel/nearby?lat=${config.latitude}&lng=${config.longitude}&radius=${radius}`
 
     if (config.debug) {
@@ -110,10 +132,10 @@ module.exports = NodeHelper.create({
 
     this.httpsGet(endpoint, (err, data) => {
       if (err) {
-        const retryAttempts = config.retryAttempts || 3
+        const retryAttempts = config.retryAttempts ?? 3
         if (attempt < retryAttempts) {
           console.log(`[MMM-FuelNorway] Retry ${attempt}/${retryAttempts} after error: ${err.message}`)
-          setTimeout(() => this.fetchNearby(config, attempt + 1), config.retryDelay || 5000)
+          setTimeout(() => this.fetchNearby(config, attempt + 1), config.retryDelay ?? 5000)
         } else {
           this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
         }
@@ -146,9 +168,9 @@ module.exports = NodeHelper.create({
 
     this.httpsGet(endpoint, (err, data) => {
       if (err) {
-        const retryAttempts = (this.config && this.config.retryAttempts) || 3
+        const retryAttempts = (this.config && this.config.retryAttempts) ?? 3
         if (attempt < retryAttempts) {
-          setTimeout(() => this.fetchStation(stationId, callback, attempt + 1), (this.config && this.config.retryDelay) || 5000)
+          setTimeout(() => this.fetchStation(stationId, callback, attempt + 1), (this.config && this.config.retryDelay) ?? 5000)
         } else {
           callback(err, null)
         }
@@ -167,27 +189,29 @@ module.exports = NodeHelper.create({
 
   fetchMultipleStations(config) {
     const ids = config.stationIds
-    const results = []
-    let completed = 0
-    let hasError = false
+    const stationPromises = ids.map(
+      (stationId) =>
+        new Promise((resolve, reject) => {
+          this.fetchStation(stationId, (err, station) => {
+            if (err) {
+              reject(new Error(`Failed to fetch station ${stationId}: ${err.message}`))
+              return
+            }
+            resolve(station)
+          })
+        })
+    )
 
-    ids.forEach((stationId) => {
-      this.fetchStation(stationId, (err, station) => {
-        if (hasError) return
-        if (err) {
-          hasError = true
-          this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Failed to fetch station ${stationId}: ${err.message}` })
-          return
-        }
-        results.push(this.normalizeStation(station, null, null))
-        completed++
-        if (completed === ids.length) {
-          this.cache = results
-          this.cacheTime = Date.now()
-          this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', results)
-        }
+    Promise.all(stationPromises)
+      .then((stations) => {
+        const normalized = stations.map((station) => this.normalizeStation(station, config.latitude, config.longitude))
+        this.cache = normalized
+        this.cacheTime = Date.now()
+        this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
       })
-    })
+      .catch((err) => {
+        this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
+      })
   },
 
   httpsGet(endpoint, callback) {

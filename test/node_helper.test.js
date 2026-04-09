@@ -16,9 +16,15 @@ const stationFixture = JSON.parse(
 
 // ── Utility functions mirroring node_helper.js logic ──
 
+function toNumber(value) {
+  if (value === null || value === undefined || value === '') return null
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
 function validateConfig(config) {
   if (config.method === 'nearby') {
-    return typeof config.latitude === 'number' && typeof config.longitude === 'number'
+    return toNumber(config.latitude) !== null && toNumber(config.longitude) !== null
   }
   if (config.method === 'manual') {
     return Array.isArray(config.stationIds) && config.stationIds.length > 0
@@ -28,8 +34,10 @@ function validateConfig(config) {
 
 function buildNearbyUrl(config) {
   const baseUrl = 'https://backend.drivstoffapp.no'
-  const radius = config.radius || 5
-  return `${baseUrl}/stations/fuel/nearby?lat=${config.latitude}&lng=${config.longitude}&radius=${radius}`
+  const lat = toNumber(config.latitude)
+  const lng = toNumber(config.longitude)
+  const radius = toNumber(config.radius) ?? 5
+  return `${baseUrl}/stations/fuel/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
 }
 
 function buildStationUrl(stationId) {
@@ -40,7 +48,7 @@ function buildStationUrl(stationId) {
 function isCacheValid(cache, cacheTime, updateInterval) {
   if (!cache || !cacheTime) return false
   const age = Date.now() - cacheTime
-  return age < (updateInterval || 15 * 60 * 1000)
+  return age < ((updateInterval ?? 15 * 60 * 1000))
 }
 
 function parseStationResponse(body) {
@@ -59,11 +67,13 @@ function normaliseToArray(data) {
 }
 
 function buildRetryDelay(config) {
-  return config.retryDelay || 5000
+  const delay = toNumber(config.retryDelay)
+  return delay ?? 5000
 }
 
 function shouldRetry(attempt, config) {
-  return attempt < (config.retryAttempts || 3)
+  const attempts = toNumber(config.retryAttempts) ?? 3
+  return attempt < attempts
 }
 
 // Mirror of node_helper.js normalizeStation + haversineDistance
@@ -81,12 +91,14 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 function normalizeStation(raw, userLat, userLng) {
   const prices = (raw && raw.prices) || {}
   const location = (raw && raw.location) || {}
-  const stationLat = location.latitude || null
-  const stationLng = location.longitude || null
+  const stationLat = toNumber(location.latitude)
+  const stationLng = toNumber(location.longitude)
+  const userLatNum = toNumber(userLat)
+  const userLngNum = toNumber(userLng)
 
   let distance = null
-  if (typeof userLat === 'number' && typeof userLng === 'number' && stationLat && stationLng) {
-    distance = Math.round(haversineDistance(userLat, userLng, stationLat, stationLng) * 10) / 10
+  if (userLatNum !== null && userLngNum !== null && stationLat !== null && stationLng !== null) {
+    distance = Math.round(haversineDistance(userLatNum, userLngNum, stationLat, stationLng) * 10) / 10
   }
 
   return {
@@ -100,12 +112,12 @@ function normalizeStation(raw, userLat, userLng) {
     latitude: stationLat,
     longitude: stationLng,
     distance,
-    gasoline_price: prices.gasoline_price !== undefined ? prices.gasoline_price : null,
-    gasoline_95_price: prices.gasoline_95_price !== undefined ? prices.gasoline_95_price : null,
-    gasoline_98_price: prices.gasoline_98_price !== undefined ? prices.gasoline_98_price : null,
-    diesel_price: prices.diesel_price !== undefined ? prices.diesel_price : null,
-    hvo100_price: prices.hvo100_price !== undefined ? prices.hvo100_price : null,
-    fd_price: prices.fd_price !== undefined ? prices.fd_price : null,
+    gasoline_price: prices.gasoline_price !== undefined ? toNumber(prices.gasoline_price) : null,
+    gasoline_95_price: prices.gasoline_95_price !== undefined ? toNumber(prices.gasoline_95_price) : null,
+    gasoline_98_price: prices.gasoline_98_price !== undefined ? toNumber(prices.gasoline_98_price) : null,
+    diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
+    hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
+    fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
     last_updated: prices.last_updated || null,
     logo: raw.logo || null
   }
@@ -122,9 +134,10 @@ describe('Config validation', () => {
     assert.strictEqual(validateConfig({ method: 'nearby', longitude: 10.7 }), false)
   })
 
-  test('validates nearby config rejects non-number lat/lng', () => {
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: '59.9', longitude: 10.7 }), false)
-    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: '10.7' }), false)
+  test('accepts numeric string lat/lng but rejects non-numeric', () => {
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: '59.9', longitude: '10.7' }), true)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 'not-number', longitude: 10.7 }), false)
+    assert.strictEqual(validateConfig({ method: 'nearby', latitude: 59.9, longitude: 'ten' }), false)
   })
 
   test('validates manual config requires stationIds array', () => {
@@ -161,6 +174,11 @@ describe('URL building', () => {
     const result = buildStationUrl(12345)
     assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/12345')
   })
+
+  test('builds nearby URL when lat/lng and radius are numeric strings', () => {
+    const result = buildNearbyUrl({ latitude: '59.9139', longitude: '10.7522', radius: '7' })
+    assert.strictEqual(result, 'https://backend.drivstoffapp.no/stations/fuel/nearby?lat=59.9139&lng=10.7522&radius=7')
+  })
 })
 
 describe('Cache validation', () => {
@@ -182,6 +200,11 @@ describe('Cache validation', () => {
   test('uses default interval when not specified', () => {
     const freshTime = Date.now() - 60000
     assert.strictEqual(isCacheValid([{}], freshTime, undefined), true)
+  })
+
+  test('accepts numeric string updateInterval', () => {
+    const freshTime = Date.now() - 60000
+    assert.strictEqual(isCacheValid([{}], freshTime, '900000'), true)
   })
 })
 
@@ -236,6 +259,12 @@ describe('Retry logic', () => {
 
   test('buildRetryDelay defaults to 5000ms', () => {
     assert.strictEqual(buildRetryDelay({}), 5000)
+  })
+
+  test('retry helpers accept numeric string values', () => {
+    assert.strictEqual(buildRetryDelay({ retryDelay: '3000' }), 3000)
+    assert.strictEqual(shouldRetry(1, { retryAttempts: '2' }), true)
+    assert.strictEqual(shouldRetry(2, { retryAttempts: '2' }), false)
   })
 })
 
@@ -354,5 +383,28 @@ describe('Station normalisation', () => {
     assert.strictEqual(result.gasoline_price, null)
     assert.strictEqual(result.diesel_price, null)
     assert.strictEqual(result.last_updated, null)
+  })
+
+  test('calculates distance when coordinates are zero', () => {
+    const raw = { id: 'zero', name: 'Zero', street: '', city: '', zip: '', logo: null, location: { latitude: 0, longitude: 0 }, prices: {} }
+    const result = normalizeStation(raw, 0, 0)
+    assert.strictEqual(result.distance, 0)
+  })
+
+  test('parses numeric string prices to numbers and ignores invalid ones', () => {
+    const raw = {
+      id: 'string-prices',
+      name: 'String Station',
+      street: '',
+      city: '',
+      zip: '',
+      logo: null,
+      location: { latitude: '59.9', longitude: '10.7' },
+      prices: { gasoline_price: '19.55', diesel_price: 'bad-data' }
+    }
+    const result = normalizeStation(raw, '59.9', '10.7')
+    assert.strictEqual(result.gasoline_price, 19.55)
+    assert.strictEqual(result.diesel_price, null)
+    assert.ok(result.distance !== null)
   })
 })

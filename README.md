@@ -92,6 +92,11 @@ Add the module to your `config/config.js`:
 }
 ```
 
+**Notes**
+- `latitude`, `longitude`, and `radius` accept either numbers or numeric strings (useful when values come from environment variables).
+- In `manual` mode you can still provide `latitude`/`longitude`; when present, distances are calculated for those stations too.
+- Configuration errors returned by the helper are now surfaced in the module UI to speed up troubleshooting.
+
 ### Manual – specific stations
 
 ```javascript

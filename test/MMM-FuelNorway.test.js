@@ -36,8 +36,10 @@ const defaults = {
 // ── Utility functions mirroring MMM-FuelNorway.js ──
 
 function formatPrice(price, decimalPlaces, currencyFormat, compactPriceFormat) {
-  if (price === null || price === undefined) return '-'
-  const formatted = Number(price).toFixed(decimalPlaces)
+  if (price === null || price === undefined || price === '') return '-'
+  const numeric = Number(price)
+  if (!Number.isFinite(numeric)) return '-'
+  const formatted = numeric.toFixed(decimalPlaces)
   if (compactPriceFormat) return formatted
   return `${formatted} ${currencyFormat}`
 }
@@ -45,6 +47,7 @@ function formatPrice(price, decimalPlaces, currencyFormat, compactPriceFormat) {
 function formatTimestamp(timestamp, format) {
   if (!timestamp) return ''
   const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) return ''
   if (format === 'relative') {
     const diffMs = Date.now() - date.getTime()
     const diffMins = Math.floor(diffMs / 60000)
@@ -156,12 +159,21 @@ describe('Price formatting', () => {
     assert.strictEqual(formatPrice(19.49, 2, 'NOK', true), '19.49')
   })
 
+  test('formats numeric string input', () => {
+    assert.strictEqual(formatPrice('19.49', 2, 'NOK', false), '19.49 NOK')
+  })
+
   test('returns dash for null price', () => {
     assert.strictEqual(formatPrice(null, 2, 'NOK', false), '-')
   })
 
   test('returns dash for undefined price', () => {
     assert.strictEqual(formatPrice(undefined, 2, 'NOK', false), '-')
+  })
+
+  test('returns dash for non-numeric input', () => {
+    assert.strictEqual(formatPrice('not-a-number', 2, 'NOK', false), '-')
+    assert.strictEqual(formatPrice('', 2, 'NOK', false), '-')
   })
 
   test('formats to configured decimal places', () => {
@@ -198,6 +210,10 @@ describe('Timestamp formatting', () => {
   test('returns empty string for falsy timestamp', () => {
     assert.strictEqual(formatTimestamp(null, 'relative'), '')
     assert.strictEqual(formatTimestamp('', 'relative'), '')
+  })
+
+  test('returns empty string for invalid timestamp value', () => {
+    assert.strictEqual(formatTimestamp('not-a-date', 'relative'), '')
   })
 })
 
