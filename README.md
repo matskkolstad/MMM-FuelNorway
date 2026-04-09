@@ -104,7 +104,7 @@ Add the module to your `config/config.js`:
 
 ### Layout tips
 
-- Use `orientation: 'horizontal'` in list mode to keep station details on the left and prices on the right; the module will automatically flow rows into multiple columns when space allows.
+- Use `orientation: 'horizontal'` to keep price chips on a single row; if space is tight, they scroll horizontally instead of wrapping.
 - Use `orientation: 'vertical'` for narrow regions — prices stack beneath the station details to avoid overlap in both list and grid modes.
 - `moduleSize: 'small'` now trims padding and chip spacing for dashboards that need to fit many modules.
 

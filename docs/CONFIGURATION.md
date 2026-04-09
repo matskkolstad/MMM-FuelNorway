@@ -65,6 +65,8 @@ All available configuration options for the MMM-FuelNorway module.
 | `moduleSize` | `string` | `'medium'` | Font/element size: `'small'` (compact padding), `'medium'`, or `'large'` |
 | `maxStations` | `number` | `5` | Maximum number of stations to display |
 
+> In horizontal orientation, price chips stay on one line and will scroll horizontally if they don't fit the module width.
+
 ### Station Details
 
 | Option | Type | Default | Description |

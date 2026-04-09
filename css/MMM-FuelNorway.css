@@ -214,6 +214,13 @@
   z-index: 1;
 }
 
+.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(120px, 1fr);
+  overflow-x: auto;
+}
+
 .mmm-fuelnorway-price {
   display: flex;
   flex-direction: column;
@@ -297,6 +304,13 @@
   gap: 6px;
 }
 
+.mmm-fuelnorway-horizontal .mmm-fuelnorway-list-item .mmm-fuelnorway-prices {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(95px, 1fr);
+  overflow-x: auto;
+}
+
 .mmm-fuelnorway-inline-prices {
   width: 100%;
 }
@@ -333,6 +347,17 @@
 .mmm-fuelnorway-small .mmm-fuelnorway-prices {
   gap: 6px;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.mmm-fuelnorway-horizontal.mmm-fuelnorway-small .mmm-fuelnorway-list-item .mmm-fuelnorway-prices {
+  grid-auto-columns: minmax(100px, 1fr);
+}
+
+.mmm-fuelnorway-horizontal.mmm-fuelnorway-small .mmm-fuelnorway-prices {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(110px, 1fr);
+  overflow-x: auto;
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-price {
