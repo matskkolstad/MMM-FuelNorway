@@ -70,6 +70,8 @@ Add the module to your `config/config.js`:
     moduleSize: 'medium',      // 'small', 'medium', 'large'
 
     fuelTypes: ['gasoline_price', 'diesel_price'],
+    // Available: 'gasoline_price', 'gasoline_95_price', 'gasoline_98_price',
+    //            'diesel_price', 'hvo100_price', 'fd_price'
 
     showStationName: true,
     showAddress: true,
@@ -98,7 +100,7 @@ Add the module to your `config/config.js`:
   position: 'top_right',
   config: {
     method: 'manual',
-    stationIds: ['ewf1ni1aituz3xc', '2bc5fi4pdadlnc1'],
+    stationIds: ['j1i4da8bf8wkcql', 'mw85fkdf8cq9b5n'],
     displayMode: 'grid',
     fuelTypes: ['gasoline_price', 'diesel_price', 'hvo100_price']
   }
@@ -129,7 +131,32 @@ Each station object in the response contains an `id` field — use that value in
 - **Nearby endpoint:** `GET /stations/fuel/nearby?lat={lat}&lng={lng}&radius={km}`
 - **Single station:** `GET /stations/fuel/{station_id}`
 - No authentication required for public endpoints
+- Prices are returned nested under `station.prices.*`; the module normalises these automatically
 - The module respects the `updateInterval` and will not make duplicate requests within that window (caching)
+- Station distance is calculated using the Haversine formula (the API does not return a distance field)
+
+### API response structure (summary)
+
+```json
+{
+  "id": "j1i4da8bf8wkcql",
+  "name": "Fredensborg",
+  "logo": "https://...",
+  "street": "Maridalsveien 10",
+  "city": "Oslo",
+  "zip": "0178",
+  "location": { "latitude": 59.920, "longitude": 10.751 },
+  "prices": {
+    "gasoline_price": 19.20,
+    "gasoline_95_price": 19.20,
+    "gasoline_98_price": null,
+    "diesel_price": 24.61,
+    "hvo100_price": null,
+    "fd_price": null,
+    "last_updated": "2026-04-09T11:03:29Z"
+  }
+}
+```
 
 ---
 
@@ -139,6 +166,7 @@ Each station object in the response contains an `id` field — use that value in
 |---------|----------|
 | "No stations found" | Check your `latitude`/`longitude` values and increase `radius` |
 | "Error loading fuel prices" | Enable `debug: true` and check browser/server logs |
+| Prices show `–` for every station | Verify `fuelTypes` contains valid keys — see the API notes section |
 | Prices not updating | The module caches results; wait for `updateInterval` to expire |
 | Module blank on startup | Verify `method`, `latitude`, and `longitude` are set correctly |
 

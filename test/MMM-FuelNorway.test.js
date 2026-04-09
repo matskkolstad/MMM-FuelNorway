@@ -67,6 +67,8 @@ function formatAddress(address, format) {
 function getFuelLabel(fuelType) {
   const map = {
     gasoline_price: 'Petrol',
+    gasoline_95_price: 'Petrol 95',
+    gasoline_98_price: 'Petrol 98',
     diesel_price: 'Diesel',
     hvo100_price: 'HVO100',
     fd_price: 'Electric'
@@ -202,6 +204,14 @@ describe('Timestamp formatting', () => {
 describe('Fuel type label mapping', () => {
   test('maps gasoline_price to Petrol', () => {
     assert.strictEqual(getFuelLabel('gasoline_price'), 'Petrol')
+  })
+
+  test('maps gasoline_95_price to Petrol 95', () => {
+    assert.strictEqual(getFuelLabel('gasoline_95_price'), 'Petrol 95')
+  })
+
+  test('maps gasoline_98_price to Petrol 98', () => {
+    assert.strictEqual(getFuelLabel('gasoline_98_price'), 'Petrol 98')
   })
 
   test('maps diesel_price to Diesel', () => {

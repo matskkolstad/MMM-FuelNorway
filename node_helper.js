@@ -51,6 +51,54 @@ module.exports = NodeHelper.create({
     }
   },
 
+  // Normalise a raw API station object into the flat format the front-end expects.
+  // The real API nests prices under station.prices and the address as separate flat
+  // fields (street / city / zip), so we flatten everything here.
+  normalizeStation(raw, userLat, userLng) {
+    const prices = (raw && raw.prices) || {}
+    const location = (raw && raw.location) || {}
+    const stationLat = location.latitude || null
+    const stationLng = location.longitude || null
+
+    let distance = null
+    if (typeof userLat === 'number' && typeof userLng === 'number' && stationLat && stationLng) {
+      distance = Math.round(this.haversineDistance(userLat, userLng, stationLat, stationLng) * 10) / 10
+    }
+
+    return {
+      id: raw.id,
+      name: raw.name || raw.station_name || '',
+      address: {
+        street: raw.street || '',
+        city: raw.city || '',
+        zip: raw.zip || ''
+      },
+      latitude: stationLat,
+      longitude: stationLng,
+      distance,
+      gasoline_price: prices.gasoline_price !== undefined ? prices.gasoline_price : null,
+      gasoline_95_price: prices.gasoline_95_price !== undefined ? prices.gasoline_95_price : null,
+      gasoline_98_price: prices.gasoline_98_price !== undefined ? prices.gasoline_98_price : null,
+      diesel_price: prices.diesel_price !== undefined ? prices.diesel_price : null,
+      hvo100_price: prices.hvo100_price !== undefined ? prices.hvo100_price : null,
+      fd_price: prices.fd_price !== undefined ? prices.fd_price : null,
+      last_updated: prices.last_updated || null,
+      logo: raw.logo || null
+    }
+  },
+
+  // Haversine formula – returns distance in kilometres between two lat/lng points.
+  haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371
+    const toRad = (deg) => (deg * Math.PI) / 180
+    const dLat = toRad(lat2 - lat1)
+    const dLon = toRad(lon2 - lon1)
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  },
+
   fetchNearby(config, attempt) {
     attempt = attempt || 1
     const radius = config.radius || 5
@@ -81,9 +129,10 @@ module.exports = NodeHelper.create({
       if (!Array.isArray(stations)) {
         stations = [stations]
       }
-      this.cache = stations
+      const normalized = stations.map((s) => this.normalizeStation(s, config.latitude, config.longitude))
+      this.cache = normalized
       this.cacheTime = Date.now()
-      this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', stations)
+      this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
     })
   },
 
@@ -130,7 +179,7 @@ module.exports = NodeHelper.create({
           this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Failed to fetch station ${stationId}: ${err.message}` })
           return
         }
-        results.push(station)
+        results.push(this.normalizeStation(station, null, null))
         completed++
         if (completed === ids.length) {
           this.cache = results
