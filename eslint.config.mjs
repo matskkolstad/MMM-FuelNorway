@@ -27,7 +27,9 @@ export default [
     },
     rules: {
       'no-unused-vars': ['warn', { caughtErrorsIgnorePattern: '^_' }],
-      'no-console': 'off'
+      'no-console': 'off',
+      'no-var': 'error',
+      'prefer-const': ['warn', { destructuring: 'all' }]
     }
   },
   {

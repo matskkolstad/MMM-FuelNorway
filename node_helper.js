@@ -17,6 +17,7 @@ module.exports = NodeHelper.create({
     this.cache = null
     this.cacheTime = null
     this.config = null
+    this.requestInProgress = false
   },
 
   socketNotificationReceived(notification, payload) {
@@ -35,12 +36,18 @@ module.exports = NodeHelper.create({
     const updateInterval = toNumber(config.updateInterval)
     const retryAttempts = toNumber(config.retryAttempts)
     const retryDelay = toNumber(config.retryDelay)
+    const safeInterval = updateInterval !== null && updateInterval >= 5000
+      ? updateInterval
+      : 15 * 60 * 1000
+    if (updateInterval !== null && updateInterval < 5000) {
+      console.warn('[MMM-FuelNorway] updateInterval is below minimum (5000 ms); using default 15 minutes')
+    }
     const normalizedConfig = {
       ...config,
       latitude: toNumber(config.latitude),
       longitude: toNumber(config.longitude),
       radius: toNumber(config.radius) ?? 5,
-      updateInterval: updateInterval ?? 15 * 60 * 1000,
+      updateInterval: safeInterval,
       retryAttempts: retryAttempts ?? 3,
       retryDelay: retryDelay ?? 5000
     }
@@ -54,17 +61,26 @@ module.exports = NodeHelper.create({
       return
     }
 
+    if (this.requestInProgress) {
+      if (this.config.debug) {
+        console.log('[MMM-FuelNorway] Request already in progress, skipping duplicate fetch')
+      }
+      return
+    }
+
     if (config.method === 'nearby') {
       if (normalizedConfig.latitude === null || normalizedConfig.longitude === null) {
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: latitude and longitude required for nearby method' })
         return
       }
+      this.requestInProgress = true
       this.fetchNearby(normalizedConfig)
     } else if (config.method === 'manual') {
       if (!Array.isArray(config.stationIds) || config.stationIds.length === 0) {
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Configuration error: stationIds array required for manual method' })
         return
       }
+      this.requestInProgress = true
       this.fetchMultipleStations(normalizedConfig)
     } else {
       this.sendSocketNotification('FUELNORWAY_ERROR', { message: `Unknown method: ${config.method}` })
@@ -98,9 +114,9 @@ module.exports = NodeHelper.create({
       .map((part) => part.trim())
       .filter(Boolean)
 
-    const street = raw.street || addressStreet || ''
-    const city = raw.city || (addressRest.length > 0 ? addressRest.join(', ') : '')
-    const zip = raw.zip || ''
+    const street = (raw && raw.street) || addressStreet || ''
+    const city = (raw && raw.city) || (addressRest.length > 0 ? addressRest.join(', ') : '')
+    const zip = (raw && raw.zip) || ''
 
     return { street, city, zip }
   },
@@ -136,7 +152,7 @@ module.exports = NodeHelper.create({
       diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
       hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
       fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
-      last_updated: prices.last_updated || null,
+      last_updated: prices.last_updated || raw.last_updated || null,
       logo: raw.logo || null
     }
   },
@@ -169,6 +185,7 @@ module.exports = NodeHelper.create({
           console.log(`[MMM-FuelNorway] Retry ${attempt}/${retryAttempts} after error: ${err.message}`)
           setTimeout(() => this.fetchNearby(config, attempt + 1), config.retryDelay ?? 5000)
         } else {
+          this.requestInProgress = false
           this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
         }
         return
@@ -177,15 +194,26 @@ module.exports = NodeHelper.create({
       try {
         stations = JSON.parse(data)
       } catch (_e) {
+        this.requestInProgress = false
         this.sendSocketNotification('FUELNORWAY_ERROR', { message: 'Failed to parse API response' })
         return
       }
       if (!Array.isArray(stations)) {
         stations = [stations]
       }
+      if (config.debug) {
+        console.log(`[MMM-FuelNorway] Parsed ${stations.length} station(s) from nearby response`)
+        if (stations.length > 0) {
+          console.log(`[MMM-FuelNorway] First station: id=${stations[0].id}, name=${stations[0].name}`)
+        }
+      }
       const normalized = stations.map((s) => this.normalizeStation(s, config.latitude, config.longitude))
       this.cache = normalized
       this.cacheTime = Date.now()
+      this.requestInProgress = false
+      if (config.debug) {
+        console.log(`[MMM-FuelNorway] Sending FUELNORWAY_DATA_RECEIVED with ${normalized.length} station(s)`)
+      }
       this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
     })
   },
@@ -220,30 +248,57 @@ module.exports = NodeHelper.create({
   },
 
   fetchMultipleStations(config) {
-    const ids = config.stationIds
-    const stationPromises = ids.map(
-      (stationId) =>
-        new Promise((resolve, reject) => {
-          this.fetchStation(stationId, (err, station) => {
-            if (err) {
-              reject(new Error(`Failed to fetch station ${stationId}: ${err.message}`))
-              return
-            }
-            resolve(station)
-          })
-        })
-    )
+    const ids = [...config.stationIds]
+    const concurrencyLimit = 5
+    const results = new Array(ids.length).fill(null)
+    let activeCount = 0
+    let nextIndex = 0
+    let failed = false
 
-    Promise.all(stationPromises)
-      .then((stations) => {
-        const normalized = stations.map((station) => this.normalizeStation(station, config.latitude, config.longitude))
+    if (config.debug) {
+      console.log(`[MMM-FuelNorway] Queue-based fetch starting for ${ids.length} station(s) (max ${concurrencyLimit} parallel)`)
+    }
+
+    const finish = (err) => {
+      this.requestInProgress = false
+      if (err) {
+        this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
+      } else {
+        const normalized = results.map((station) => this.normalizeStation(station, config.latitude, config.longitude))
         this.cache = normalized
         this.cacheTime = Date.now()
+        if (config.debug) {
+          console.log(`[MMM-FuelNorway] Sending FUELNORWAY_DATA_RECEIVED with ${normalized.length} station(s)`)
+        }
         this.sendSocketNotification('FUELNORWAY_DATA_RECEIVED', normalized)
-      })
-      .catch((err) => {
-        this.sendSocketNotification('FUELNORWAY_ERROR', { message: err.message })
-      })
+      }
+    }
+
+    const dispatch = () => {
+      if (failed) return
+      while (activeCount < concurrencyLimit && nextIndex < ids.length) {
+        const idx = nextIndex++
+        const stationId = ids[idx]
+        activeCount++
+        this.fetchStation(stationId, (err, station) => {
+          activeCount--
+          if (failed) return
+          if (err) {
+            failed = true
+            finish(new Error(`Failed to fetch station ${stationId}: ${err.message}`))
+            return
+          }
+          results[idx] = station
+          if (nextIndex < ids.length) {
+            dispatch()
+          } else if (activeCount === 0) {
+            finish(null)
+          }
+        })
+      }
+    }
+
+    dispatch()
   },
 
   httpsGet(endpoint, callback) {

@@ -56,9 +56,11 @@
 }
 
 .mmm-fuelnorway-list-wrapper.mmm-fuelnorway-horizontal .mmm-fuelnorway-list-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px 12px;
+  align-items: start;
 }
 
 .mmm-fuelnorway-grid {
@@ -337,11 +339,6 @@
   background: transparent;
   border: none;
   box-shadow: none;
-}
-
-.mmm-fuelnorway-list-wrapper.mmm-fuelnorway-horizontal .mmm-fuelnorway-list-body {
-  gap: 10px 12px;
-  align-items: start;
 }
 
 .mmm-fuelnorway-list-wrapper.mmm-fuelnorway-horizontal .mmm-fuelnorway-list-item {
