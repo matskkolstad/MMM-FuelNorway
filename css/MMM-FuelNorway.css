@@ -34,7 +34,7 @@
 .mmm-fuelnorway-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mmm-fuelnorway-list-wrapper {
@@ -45,14 +45,14 @@
   background: var(--mmm-fuelnorway-bg);
   border: 1px solid var(--mmm-fuelnorway-border);
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   box-shadow: var(--mmm-fuelnorway-shadow);
 }
 
 .mmm-fuelnorway-list-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mmm-fuelnorway-list-wrapper.mmm-fuelnorway-horizontal .mmm-fuelnorway-list-body {
@@ -82,7 +82,7 @@
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-list-card {
-  padding: 8px 10px;
+  padding: 7px 9px;
   border-radius: 12px;
 }
 
@@ -99,14 +99,14 @@
 .mmm-fuelnorway-station {
   position: relative;
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 9px 11px;
   background: var(--mmm-fuelnorway-bg);
   border: 1px solid var(--mmm-fuelnorway-border);
   box-shadow: var(--mmm-fuelnorway-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .mmm-fuelnorway-station::before {
@@ -134,14 +134,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   z-index: 1;
 }
 
 .mmm-fuelnorway-heading {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -176,7 +176,7 @@
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--mmm-fuelnorway-border);
   color: var(--mmm-fuelnorway-accent);
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: 999px;
   font-size: 0.78em;
   letter-spacing: 0.02em;
@@ -188,7 +188,7 @@
 .mmm-fuelnorway-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   z-index: 1;
 }
 
@@ -209,8 +209,8 @@
 
 .mmm-fuelnorway-prices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 6px;
   z-index: 1;
 }
 
@@ -224,8 +224,8 @@
 .mmm-fuelnorway-price {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 9px;
+  gap: 3px;
+  padding: 7px 8px;
   border-radius: 10px;
   background: var(--mmm-fuelnorway-chip);
   border: 1px solid var(--mmm-fuelnorway-border);
@@ -268,8 +268,8 @@
 .mmm-fuelnorway-list-item {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 6px 12px;
-  padding: 6px 0;
+  gap: 5px 10px;
+  padding: 4px 0;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--mmm-fuelnorway-border);
@@ -301,7 +301,7 @@
   grid-row: 1 / span 2;
   align-self: stretch;
   grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-  gap: 6px;
+  gap: 5px;
 }
 
 .mmm-fuelnorway-horizontal .mmm-fuelnorway-list-item .mmm-fuelnorway-prices {
@@ -313,6 +313,23 @@
 
 .mmm-fuelnorway-inline-prices {
   width: 100%;
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(100px, 1fr);
+  gap: 6px;
+  align-items: stretch;
+  overflow-x: auto;
+}
+
+.mmm-fuelnorway-inline-prices .mmm-fuelnorway-price {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mmm-fuelnorway-inline-prices .mmm-fuelnorway-fuel-label {
+  white-space: nowrap;
+  letter-spacing: 0.03em;
 }
 
 .mmm-fuelnorway-list-wrapper.mmm-fuelnorway-vertical .mmm-fuelnorway-list-item {
@@ -322,7 +339,7 @@
 .mmm-fuelnorway-list-wrapper.mmm-fuelnorway-vertical .mmm-fuelnorway-list-item .mmm-fuelnorway-prices {
   grid-column: 1 / 2;
   grid-row: auto;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* ── Compact variant tweaks ── */
@@ -345,8 +362,8 @@
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-prices {
-  gap: 6px;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 5px;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
 }
 
 .mmm-fuelnorway-horizontal.mmm-fuelnorway-small .mmm-fuelnorway-list-item .mmm-fuelnorway-prices {
@@ -361,17 +378,24 @@
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-price {
-  padding: 7px 8px;
-  gap: 3px;
+  padding: 6px 7px;
+  gap: 2px;
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-fuel-value {
-  font-size: 0.95em;
+  font-size: 0.93em;
 }
 
 .mmm-fuelnorway-small .mmm-fuelnorway-list-item {
-  padding: 4px 0;
-  gap: 5px 10px;
+  padding: 3px 0;
+  gap: 4px 8px;
+}
+
+.mmm-fuelnorway-small .mmm-fuelnorway-inline-prices {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(95px, 1fr);
+  gap: 5px;
 }
 
 /* ── Layout tweaks ── */
