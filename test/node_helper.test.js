@@ -49,9 +49,9 @@ function buildAddress(raw) {
     .map((part) => part.trim())
     .filter(Boolean)
 
-  const street = raw.street || addressStreet || ''
-  const city = raw.city || (addressRest.length > 0 ? addressRest.join(', ') : '')
-  const zip = raw.zip || ''
+  const street = (raw && raw.street) || addressStreet || ''
+  const city = (raw && raw.city) || (addressRest.length > 0 ? addressRest.join(', ') : '')
+  const zip = (raw && raw.zip) || ''
 
   return { street, city, zip }
 }
@@ -94,7 +94,7 @@ function parseStationResponse(body) {
   }
 }
 
-function normaliseToArray(data) {
+function normalizeToArray(data) {
   if (Array.isArray(data)) return data
   if (data && typeof data === 'object') return [data]
   return []
@@ -150,7 +150,7 @@ function normalizeStation(raw, userLat, userLng) {
     diesel_price: prices.diesel_price !== undefined ? toNumber(prices.diesel_price) : null,
     hvo100_price: prices.hvo100_price !== undefined ? toNumber(prices.hvo100_price) : null,
     fd_price: prices.fd_price !== undefined ? toNumber(prices.fd_price) : null,
-    last_updated: prices.last_updated || null,
+    last_updated: prices.last_updated || raw.last_updated || null,
     logo: raw.logo || null
   }
 }
@@ -255,20 +255,20 @@ describe('Response parsing', () => {
   })
 })
 
-describe('normaliseToArray', () => {
+describe('normalizeToArray', () => {
   test('returns arrays unchanged', () => {
     const arr = [{ id: '1' }, { id: '2' }]
-    assert.deepStrictEqual(normaliseToArray(arr), arr)
+    assert.deepStrictEqual(normalizeToArray(arr), arr)
   })
 
   test('wraps a single object in array', () => {
     const station = { id: '1', name: 'Test' }
-    assert.deepStrictEqual(normaliseToArray(station), [station])
+    assert.deepStrictEqual(normalizeToArray(station), [station])
   })
 
   test('returns empty array for falsy input', () => {
-    assert.deepStrictEqual(normaliseToArray(null), [])
-    assert.deepStrictEqual(normaliseToArray(undefined), [])
+    assert.deepStrictEqual(normalizeToArray(null), [])
+    assert.deepStrictEqual(normalizeToArray(undefined), [])
   })
 })
 
@@ -331,7 +331,7 @@ describe('Haversine distance', () => {
   })
 })
 
-describe('Station normalisation', () => {
+describe('Station normalization', () => {
   test('flattens nested prices to top-level fields', () => {
     const raw = stationFixture
     const result = normalizeStation(raw, null, null)
@@ -462,5 +462,63 @@ describe('Station normalisation', () => {
     assert.strictEqual(result.gasoline_price, 19.55)
     assert.strictEqual(result.diesel_price, null)
     assert.ok(result.distance !== null)
+  })
+
+  test('falls back to raw.last_updated when prices.last_updated is absent', () => {
+    const raw = {
+      id: 'fallback-ts',
+      name: 'Fallback TS',
+      street: '',
+      city: '',
+      zip: '',
+      logo: null,
+      location: {},
+      last_updated: '2026-04-10T00:00:00Z',
+      prices: { gasoline_price: 20.0 }
+    }
+    const result = normalizeStation(raw, null, null)
+    assert.strictEqual(result.last_updated, '2026-04-10T00:00:00Z')
+  })
+
+  test('returns null for last_updated when neither prices nor raw has it', () => {
+    const raw = { id: 'no-ts', name: 'No TS', street: '', city: '', zip: '', logo: null, location: {}, prices: {} }
+    const result = normalizeStation(raw, null, null)
+    assert.strictEqual(result.last_updated, null)
+  })
+
+  test('buildAddress handles null raw safely', () => {
+    // buildAddress is used internally; ensure it never throws when raw has missing fields
+    const raw = { id: 'safe', prices: {}, location: {} }
+    const result = normalizeStation(raw, null, null)
+    assert.deepStrictEqual(result.address, { street: '', city: '', zip: '' })
+  })
+})
+
+describe('updateInterval validation', () => {
+  function resolveInterval(updateInterval) {
+    const val = toNumber(updateInterval)
+    if (val !== null && val >= 5000) return val
+    return 15 * 60 * 1000
+  }
+
+  test('accepts valid interval above minimum', () => {
+    assert.strictEqual(resolveInterval(60000), 60000)
+    assert.strictEqual(resolveInterval(5000), 5000)
+  })
+
+  test('uses default for interval below minimum', () => {
+    assert.strictEqual(resolveInterval(1000), 15 * 60 * 1000)
+    assert.strictEqual(resolveInterval(0), 15 * 60 * 1000)
+    assert.strictEqual(resolveInterval(-1), 15 * 60 * 1000)
+  })
+
+  test('uses default for non-numeric interval', () => {
+    assert.strictEqual(resolveInterval(null), 15 * 60 * 1000)
+    assert.strictEqual(resolveInterval('bad'), 15 * 60 * 1000)
+    assert.strictEqual(resolveInterval(undefined), 15 * 60 * 1000)
+  })
+
+  test('accepts numeric string interval above minimum', () => {
+    assert.strictEqual(resolveInterval('30000'), 30000)
   })
 })

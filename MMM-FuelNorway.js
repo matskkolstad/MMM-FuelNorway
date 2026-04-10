@@ -65,9 +65,12 @@ Module.register('MMM-FuelNorway', {
       clearInterval(this.updateTimer)
     }
     const configuredInterval = Number(this.config.updateInterval)
-    const interval = Number.isFinite(configuredInterval) && configuredInterval > 0
+    const interval = Number.isFinite(configuredInterval) && configuredInterval >= 5000
       ? configuredInterval
       : 15 * 60 * 1000
+    if (Number.isFinite(configuredInterval) && configuredInterval > 0 && configuredInterval < 5000) {
+      Log.warn('[MMM-FuelNorway] updateInterval is below minimum (5000 ms); using default 15 minutes')
+    }
     this.updateTimer = setInterval(() => {
       this.loading = true
       this.updateDom()
