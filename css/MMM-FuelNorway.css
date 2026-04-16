@@ -53,9 +53,8 @@
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-vertical {
@@ -144,10 +143,7 @@
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  max-width: 100%;
-  flex-shrink: 1;
+  flex-wrap: nowrap;
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-prices {
@@ -162,11 +158,6 @@
   background: var(--mmm-fuelnorway-chip);
   padding: 7px 9px;
   text-align: center;
-}
-
-.mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-main {
-  flex: 1 1 170px;
-  min-width: 160px;
 }
 
 .mmm-fuelnorway-fuel-label {
