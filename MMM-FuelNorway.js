@@ -127,35 +127,16 @@ Module.register('MMM-FuelNorway', {
     const displayMode = isGridMode ? 'mmm-fuelnorway-grid' : 'mmm-fuelnorway-list'
     const orientation = this.config.orientation === 'horizontal' ? 'mmm-fuelnorway-horizontal' : 'mmm-fuelnorway-vertical'
     const size = `mmm-fuelnorway-${this.config.moduleSize}`
-    const baseClasses = [displayMode, orientation, size]
-    if (!isGridMode) {
-      baseClasses.push('mmm-fuelnorway-list-wrapper')
-    }
-    container.className = baseClasses.filter(Boolean).join(' ')
+    container.className = ['mmm-fuelnorway-container', displayMode, orientation, size].filter(Boolean).join(' ')
     container.style.setProperty('--mmm-fuelnorway-accent', this.config.priceHighlightColor || '#00ff00')
 
     const stationsForDisplay = this.selectStationsForDisplay(this.stationData, this.config.fuelTypes, this.config.maxStations)
     const cheapestByFuelType = this.findCheapest(stationsForDisplay, this.config.fuelTypes)
 
-    if (isGridMode) {
-      stationsForDisplay.forEach((station) => {
-        const stationEl = this.buildStationElement(station, cheapestByFuelType, 'grid')
-        container.appendChild(stationEl)
-      })
-    } else {
-      const listCard = document.createElement('div')
-      listCard.className = 'mmm-fuelnorway-list-card'
-      const listBody = document.createElement('div')
-      listBody.className = 'mmm-fuelnorway-list-body'
-
-      stationsForDisplay.forEach((station) => {
-        const stationEl = this.buildStationElement(station, cheapestByFuelType, 'list')
-        listBody.appendChild(stationEl)
-      })
-
-      listCard.appendChild(listBody)
-      container.appendChild(listCard)
-    }
+    stationsForDisplay.forEach((station) => {
+      const stationEl = this.buildStationElement(station, cheapestByFuelType, isGridMode ? 'grid' : 'list')
+      container.appendChild(stationEl)
+    })
 
     wrapper.appendChild(container)
     return wrapper
@@ -215,9 +196,13 @@ Module.register('MMM-FuelNorway', {
     return cheapest
   },
 
-  buildStationElement(station, cheapestByFuelType, variant = 'grid') {
+  buildStationElement(station, cheapestByFuelType, displayMode = 'list') {
     const el = document.createElement('div')
-    el.className = ['mmm-fuelnorway-station', variant === 'list' ? 'mmm-fuelnorway-list-item' : ''].filter(Boolean).join(' ')
+    const orientationClass = this.config.orientation === 'vertical' ? 'mmm-fuelnorway-vertical' : 'mmm-fuelnorway-horizontal'
+    el.className = ['mmm-fuelnorway-station', `mmm-fuelnorway-station-${displayMode}`, orientationClass].filter(Boolean).join(' ')
+
+    const main = document.createElement('div')
+    main.className = 'mmm-fuelnorway-main'
 
     const header = document.createElement('div')
     header.className = 'mmm-fuelnorway-header'
@@ -246,15 +231,6 @@ Module.register('MMM-FuelNorway', {
       header.appendChild(heading)
     }
 
-    if (station.distance !== null && station.distance !== undefined) {
-      const dist = document.createElement('div')
-      dist.className = 'mmm-fuelnorway-distance'
-      dist.textContent = `${Number(station.distance).toFixed(1)} ${this.translate('KM_AWAY')}`
-      header.appendChild(dist)
-    }
-
-    el.appendChild(header)
-
     const info = document.createElement('div')
     info.className = 'mmm-fuelnorway-info'
 
@@ -265,8 +241,25 @@ Module.register('MMM-FuelNorway', {
       info.appendChild(address)
     }
 
+    const metaParts = []
+    if (station.distance !== null && station.distance !== undefined) {
+      metaParts.push(`${Number(station.distance).toFixed(1)} km`)
+    }
+    if (this.config.showLastUpdated && station.last_updated) {
+      const formattedTimestamp = this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)
+      if (formattedTimestamp) {
+        metaParts.push(`${this.translate('LAST_UPDATED')} ${formattedTimestamp}`)
+      }
+    }
+    if (metaParts.length > 0) {
+      const meta = document.createElement('div')
+      meta.className = 'mmm-fuelnorway-meta'
+      meta.textContent = metaParts.join(' • ')
+      info.appendChild(meta)
+    }
+
     const prices = document.createElement('div')
-    prices.className = 'mmm-fuelnorway-prices' + (variant === 'list' ? ' mmm-fuelnorway-inline-prices' : '')
+    prices.className = 'mmm-fuelnorway-prices'
 
     this.config.fuelTypes.forEach((fuelType) => {
       const price = station[fuelType]
@@ -292,18 +285,12 @@ Module.register('MMM-FuelNorway', {
       prices.appendChild(priceEl)
     })
 
-    if (this.config.showLastUpdated && station.last_updated) {
-      const formattedTimestamp = this.formatTimestamp(station.last_updated, this.config.lastUpdatedFormat)
-      const updated = document.createElement('div')
-      updated.className = 'mmm-fuelnorway-updated'
-      updated.textContent = `${this.translate('LAST_UPDATED')}: ${formattedTimestamp || '-'}`
-      info.appendChild(updated)
-    }
-
+    main.appendChild(header)
     if (info.childElementCount > 0) {
-      el.appendChild(info)
+      main.appendChild(info)
     }
 
+    el.appendChild(main)
     el.appendChild(prices)
 
     return el

@@ -2,7 +2,7 @@ import js from '@eslint/js'
 
 export default [
   {
-    ignores: ['node_modules/**', 'eslint.config.mjs']
+    ignores: ['node_modules/**', 'eslint.config.mjs', 'MMM-FuelNorway-Design/**']
   },
   {
     ...js.configs.recommended,
