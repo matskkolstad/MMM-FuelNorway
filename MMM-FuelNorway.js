@@ -207,30 +207,6 @@ Module.register('MMM-FuelNorway', {
     const header = document.createElement('div')
     header.className = 'mmm-fuelnorway-header'
 
-    const heading = document.createElement('div')
-    heading.className = 'mmm-fuelnorway-heading'
-
-    if (this.config.showBrandLogo && station.logo) {
-      const logoContainer = document.createElement('div')
-      logoContainer.className = 'mmm-fuelnorway-logo'
-      const logo = document.createElement('img')
-      logo.src = station.logo
-      logo.alt = this.getStationName(station)
-      logoContainer.appendChild(logo)
-      heading.appendChild(logoContainer)
-    }
-
-    if (this.config.showStationName) {
-      const name = document.createElement('div')
-      name.className = 'mmm-fuelnorway-name'
-      name.textContent = this.getStationName(station)
-      heading.appendChild(name)
-    }
-
-    if (heading.childElementCount > 0) {
-      header.appendChild(heading)
-    }
-
     const info = document.createElement('div')
     info.className = 'mmm-fuelnorway-info'
 
@@ -256,6 +232,41 @@ Module.register('MMM-FuelNorway', {
       meta.className = 'mmm-fuelnorway-meta'
       meta.textContent = metaParts.join(' • ')
       info.appendChild(meta)
+    }
+
+    const heading = document.createElement('div')
+    heading.className = 'mmm-fuelnorway-heading'
+
+    const headingText = document.createElement('div')
+    headingText.className = 'mmm-fuelnorway-heading-text'
+
+    if (this.config.showStationName) {
+      const name = document.createElement('div')
+      name.className = 'mmm-fuelnorway-name'
+      name.textContent = this.getStationName(station)
+      headingText.appendChild(name)
+    }
+
+    if (info.childElementCount > 0) {
+      headingText.appendChild(info)
+    }
+
+    if (this.config.showBrandLogo && station.logo) {
+      const logoContainer = document.createElement('div')
+      logoContainer.className = 'mmm-fuelnorway-logo'
+      const logo = document.createElement('img')
+      logo.src = station.logo
+      logo.alt = this.getStationName(station)
+      logoContainer.appendChild(logo)
+      heading.appendChild(logoContainer)
+    }
+
+    if (headingText.childElementCount > 0) {
+      heading.appendChild(headingText)
+    }
+
+    if (heading.childElementCount > 0) {
+      header.appendChild(heading)
     }
 
     const prices = document.createElement('div')
@@ -286,9 +297,6 @@ Module.register('MMM-FuelNorway', {
     })
 
     main.appendChild(header)
-    if (info.childElementCount > 0) {
-      main.appendChild(info)
-    }
 
     el.appendChild(main)
     el.appendChild(prices)
