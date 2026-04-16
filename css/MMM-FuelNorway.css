@@ -41,11 +41,17 @@
 }
 
 .mmm-fuelnorway-grid.mmm-fuelnorway-horizontal {
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 38px;
+  row-gap: 14px;
+  padding: 2px;
 }
 
 .mmm-fuelnorway-grid.mmm-fuelnorway-vertical {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 38px;
+  row-gap: 14px;
+  padding: 2px;
 }
 
 .mmm-fuelnorway-station {
@@ -177,19 +183,155 @@
   width: 100%;
 }
 
-.mmm-fuelnorway-grid .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
+  gap: 12px;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-header {
   align-items: flex-start;
 }
 
-.mmm-fuelnorway-grid .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-heading {
+  align-items: flex-start;
+  gap: 8px;
   width: 100%;
-  flex-wrap: wrap;
-  row-gap: 8px;
-  justify-content: flex-end;
 }
 
-.mmm-fuelnorway-grid .mmm-fuelnorway-price {
-  flex: 1 1 140px;
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-heading-text,
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-info {
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-name,
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-address,
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-meta {
+  text-align: left;
+  width: 100%;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+  align-self: center;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-header {
+  width: 100%;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-heading {
+  position: relative;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 34px;
+  padding-inline: 40px;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-logo {
+  position: absolute;
+  left: -2px;
+  top: 0;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-heading-text,
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-info {
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-name,
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-address,
+.mmm-fuelnorway-list.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-meta {
+  text-align: center;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-header {
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-heading {
+  position: relative;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 34px;
+  padding-inline: 40px;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-logo {
+  position: absolute;
+  left: -2px;
+  top: 0;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-heading-text,
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-info {
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-name,
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-address,
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical .mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-meta {
+  text-align: center;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-header {
+  align-items: flex-start;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-heading {
+  align-items: flex-start;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-heading-text {
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-name,
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-address,
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-meta {
+  text-align: left;
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+  flex: 0 0 auto;
+  width: auto;
+  flex-wrap: nowrap;
+  row-gap: 0;
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-price {
+  flex: 0 0 auto;
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
