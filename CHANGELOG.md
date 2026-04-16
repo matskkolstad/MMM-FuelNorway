@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-04-16
+
+### Changed
+
+- Implemented the new Figma-based module styling in the production module UI.
+- Reworked station cards to match the new redesign: cleaner frosted cards, simplified metadata row, and refined fuel price chips.
+- Updated rendering so `displayMode: 'list'` now shows stacked station cards, while `displayMode: 'grid'` keeps tiled cards.
+- Kept cheapest-price highlighting logic intact and mapped it to the new green visual treatment.
+- Excluded `MMM-FuelNorway-Design/**` from root ESLint checks so CI linting targets module code only.
+- Updated documentation (`README.md`, `docs/CONFIGURATION.md`) to reflect the redesigned layout behavior.
+
+---
+
 ## [1.1.0] - 2026-04-09
 
 ### Fixed
@@ -113,5 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CHANGELOG.md` – this file
 - `LICENSE` – MIT
 
+[1.2.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/matskkolstad/MMM-FuelNorway/releases/tag/v1.0.0

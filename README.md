@@ -12,9 +12,8 @@ A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwe
 - 🏆 **Cheapest price highlight** – visually flag the best price per fuel type
 - 🗺️ **List and grid layouts** – vertical or horizontal orientation
 - 📐 **Three size variants** – small, medium, large
-- 🧩 **Compact list view** – single card with per-station rows for dense setups
 - 🖼️ **Brand logos** – shows the station's brand logo when available
-- 🎨 **Refreshed cards** – modern layout inspired by MMM-Sonos with accent highlights
+- 🎨 **Figma redesign implemented** – frosted cards, tighter typography, and cleaner price chips
 - 🏷️ **Resilient naming** – falls back to address/ID when station names are missing from the API
 - 🌍 **Bilingual** – English and Norwegian (Bokmål/Nynorsk) translations
 - ♻️ **Smart caching** – avoids redundant API calls between update intervals
@@ -99,15 +98,15 @@ Add the module to your `config/config.js`:
 - `latitude`, `longitude`, and `radius` accept either numbers or numeric strings (useful when values come from environment variables).
 - In `manual` mode you can still provide `latitude`/`longitude`; when present, distances are calculated for those stations too.
 - Configuration errors returned by the helper are now surfaced in the module UI to speed up troubleshooting.
-- `displayMode: 'list'` renders all stations inside a single card, keeping rows compact. Switch to `'grid'` for individual cards per station.
+- `displayMode: 'list'` renders stations as a vertical card list. Switch to `'grid'` for tiled cards.
 - `moduleSize: 'small'` tightens padding and price chips to reduce whitespace on dense dashboards.
 - Stations are automatically sorted by the cheapest available price across your configured fuel types before applying `maxStations`, and cheapest highlights are calculated from the stations that are actually displayed.
 
 ### Layout tips
 
 - Price chips keep their label and value on the same line; when space is tight they scroll horizontally instead of wrapping.
-- Use `orientation: 'vertical'` to stack station details above the price ribbon for narrow regions.
-- Use `orientation: 'horizontal'` to keep station details and prices side by side in list mode and to flow grid cards in a single scrolling row.
+- Use `orientation: 'vertical'` to stack station details above the price chips and center-align card content.
+- Use `orientation: 'horizontal'` to keep station details and prices side by side.
 - `moduleSize: 'small'` trims padding and chip spacing for dashboards that need to fit many modules.
 
 ### Manual – specific stations
