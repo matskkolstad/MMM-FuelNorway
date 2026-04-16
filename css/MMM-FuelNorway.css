@@ -40,6 +40,14 @@
   gap: 10px;
 }
 
+.mmm-fuelnorway-grid.mmm-fuelnorway-horizontal {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+.mmm-fuelnorway-grid.mmm-fuelnorway-vertical {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .mmm-fuelnorway-station {
   background: var(--mmm-fuelnorway-bg);
   backdrop-filter: blur(8px);
@@ -53,7 +61,7 @@
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
@@ -84,6 +92,25 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+
+.mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-header {
+  align-items: flex-start;
+}
+
+.mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-heading {
+  align-items: flex-start;
+}
+
+.mmm-fuelnorway-heading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mmm-fuelnorway-station.mmm-fuelnorway-vertical .mmm-fuelnorway-heading-text {
+  align-items: center;
 }
 
 .mmm-fuelnorway-logo {
@@ -140,6 +167,29 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-station {
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-main {
+  width: 100%;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-station.mmm-fuelnorway-horizontal {
+  align-items: flex-start;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
+  width: 100%;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  justify-content: flex-end;
+}
+
+.mmm-fuelnorway-grid .mmm-fuelnorway-price {
+  flex: 1 1 140px;
 }
 
 .mmm-fuelnorway-station.mmm-fuelnorway-horizontal .mmm-fuelnorway-prices {
