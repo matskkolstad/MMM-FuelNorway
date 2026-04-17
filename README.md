@@ -152,6 +152,7 @@ Each station object in the response contains an `id` field — use that value in
 - Prices are returned nested under `station.prices.*`; the module normalises these automatically
 - The module respects the `updateInterval` and will not make duplicate requests within that window (caching)
 - Station distance is calculated using the Haversine formula (the API does not return a distance field)
+- The API does not automatically retrieve data from fuel suppliers or stations. It relies on manually updated prices, and this is the data the API exposes.
 
 ### API response structure (summary)
 
@@ -188,6 +189,7 @@ Each station object in the response contains an `id` field — use that value in
 | Prices not updating | The module caches results; wait for `updateInterval` to expire |
 | Module blank on startup | Verify `method`, `latitude`, and `longitude` are set correctly |
 | Station names are blank | The helper now falls back to address/ID; ensure the API returns location data |
+| HTTP 500 error | Error you may get if you are using method: 'manual', switch to method: 'manual' (This is an error with the API, not the module) |
 
 Enable debug logging with `debug: true` in the config. Logs appear in the MagicMirror server console prefixed with `[MMM-FuelNorway]`.
 
@@ -209,7 +211,7 @@ language: 'no'
 
 MIT License — see [`LICENSE`](LICENSE) for details.
 
-Copyright (c) 2024 Mats Kjoshagen Kolstad. Created with AI assistance.
+Copyright (c) 2026 Mats Kjoshagen Kolstad. Created with AI assistance.
 
 Fuel price data provided by the [Drivstoff App](https://www.drivstoffapp.no/) API.
 
