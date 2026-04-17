@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- New extra-compact module sizes for tablet-first layouts:
+  - `xsmall`
+  - `xxsmall`
+- Added `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1).
+- Added `repository` metadata to `package.json` for better package/repository discovery.
+
+### Changed
+
+- Refined compact sizing styles so `xsmall` and `xxsmall` scale consistently across:
+  - `displayMode: 'list'` and `displayMode: 'grid'`
+  - `orientation: 'vertical'` and `orientation: 'horizontal'`
+- Updated README and configuration docs with:
+  - `xsmall` and `xxsmall` usage/examples
+  - update instructions section (`## Update`)
+  - trailing commas in config examples for lint-friendly copy/paste
+  - modern `git switch`-based contribution command examples
+- Updated CI script execution from `npm run ...` / `npm test` to `node --run ...`.
+- Updated `node_helper.js` import from `require('https')` to `require('node:https')`.
+- Updated ESLint flat config to use `defineConfig`.
+- Updated lint script from `eslint .` to `eslint`.
+- Standardized `LICENSE` content for clearer automated license detection.
+
+---
+
 ## [1.2.0] - 2026-04-16
 
 ### Changed
@@ -129,3 +157,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/matskkolstad/MMM-FuelNorway/releases/tag/v1.0.0
+[Unreleased]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.2.0...HEAD

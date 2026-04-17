@@ -46,7 +46,7 @@ Add the module to your `config/config.js`:
   config: {
     method: 'nearby',
     latitude: 59.9139,   // your latitude
-    longitude: 10.7522   // your longitude
+    longitude: 10.7522,   // your longitude
   }
 }
 ```
@@ -90,7 +90,7 @@ Add the module to your `config/config.js`:
     decimalPlaces: 2,
     compactPriceFormat: false,
 
-    debug: false
+    debug: false,
   }
 }
 ```
@@ -221,11 +221,25 @@ Fuel price data provided by the [Drivstoff App](https://www.drivstoffapp.no/) AP
 
 ---
 
+## Update
+
+To update the module:
+
+```bash
+cd ~/MagicMirror/modules/MMM-FuelNorway
+git switch main
+git pull
+npm install
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or pull request on GitHub.
+By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/my-feature`)
+2. Create your feature branch (`git switch -c feature/my-feature`)
 3. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/)
 4. Push to your branch and open a pull request

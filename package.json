@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "MagicMirror² module displaying Norwegian fuel prices via the Drivstoff App API",
   "main": "MMM-FuelNorway.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matskkolstad/MMM-FuelNorway.git"
+  },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint",
     "test": "node --test test/MMM-FuelNorway.test.js test/node_helper.test.js",
     "audit": "npm audit"
   },

@@ -1,7 +1,7 @@
 'use strict'
 
 const NodeHelper = require('node_helper')
-const https = require('https')
+const https = require('node:https')
 
 const BASE_URL = 'https://backend.drivstoffapp.no'
 

@@ -1,6 +1,7 @@
 import js from '@eslint/js'
+import { defineConfig } from 'eslint/config'
 
-export default [
+export default defineConfig([
   {
     ignores: ['node_modules/**', 'eslint.config.mjs', 'MMM-FuelNorway-Design/**']
   },
@@ -22,7 +23,7 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
-        clearInterval: 'readonly',
+        clearInterval: 'readonly'
       }
     },
     rules: {
@@ -41,11 +42,11 @@ export default [
         before: 'readonly',
         after: 'readonly',
         beforeEach: 'readonly',
-        afterEach: 'readonly',
+        afterEach: 'readonly'
       }
     },
     rules: {
       'no-unused-vars': 'off'
     }
   }
-]
+])
