@@ -12,7 +12,7 @@ A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwe
 - ⛽ **Multiple fuel types** – petrol, diesel, HVO100, electric (fast-charge)
 - 🏆 **Cheapest price highlight** – visually flag the best price per fuel type
 - 🗺️ **List and grid layouts** – vertical or horizontal orientation
-- 📐 **Three size variants** – small, medium, large
+- 📐 **Five size variants** – xxsmall, xsmall, small, medium, large
 - 🖼️ **Brand logos** – shows the station's brand logo when available
 - 🎨 **Figma redesign implemented** – frosted cards, tighter typography, and cleaner price chips
 - 🏷️ **Resilient naming** – falls back to address/ID when station names are missing from the API
@@ -70,7 +70,7 @@ Add the module to your `config/config.js`:
 
     displayMode: 'list',        // 'list' or 'grid'
     orientation: 'vertical',   // 'vertical' or 'horizontal'
-    moduleSize: 'medium',      // 'small', 'medium', 'large'
+    moduleSize: 'medium',      // 'xxsmall', 'xsmall', 'small', 'medium', 'large'
 
     fuelTypes: ['gasoline_price', 'diesel_price'],
     // Available: 'gasoline_price', 'gasoline_95_price', 'gasoline_98_price',
@@ -100,6 +100,8 @@ Add the module to your `config/config.js`:
 - In `manual` mode you can still provide `latitude`/`longitude`; when present, distances are calculated for those stations too.
 - Configuration errors returned by the helper are now surfaced in the module UI to speed up troubleshooting.
 - `displayMode: 'list'` renders stations as a vertical card list. Switch to `'grid'` for tiled cards.
+- `moduleSize: 'xxsmall'` is the most compact layout for tighter tablet dashboards.
+- `moduleSize: 'xsmall'` is optimized for smaller tablet screens where module footprint needs to be reduced further.
 - `moduleSize: 'small'` tightens padding and price chips to reduce whitespace on dense dashboards.
 - Stations are automatically sorted by the cheapest available price across your configured fuel types before applying `maxStations`, and cheapest highlights are calculated from the stations that are actually displayed.
 
@@ -108,6 +110,8 @@ Add the module to your `config/config.js`:
 - Price chips keep their label and value on the same line; when space is tight they scroll horizontally instead of wrapping.
 - Use `orientation: 'vertical'` to stack station details above the price chips and center-align card content.
 - Use `orientation: 'horizontal'` to keep station details and prices side by side.
+- `moduleSize: 'xxsmall'` applies the most aggressive spacing reduction for very limited screen space.
+- `moduleSize: 'xsmall'` minimizes padding, spacing, and card internals for compact tablet layouts.
 - `moduleSize: 'small'` trims padding and chip spacing for dashboards that need to fit many modules.
 
 ### Manual – specific stations

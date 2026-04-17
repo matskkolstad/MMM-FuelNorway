@@ -62,7 +62,7 @@ All available configuration options for the MMM-FuelNorway module.
 |--------|------|---------|-------------|
 | `displayMode` | `string` | `'list'` | Layout mode: `'list'` (stacked station cards) or `'grid'` (tiled station cards) |
 | `orientation` | `string` | `'vertical'` | Card content flow: `'vertical'` stacks details above price chips; `'horizontal'` keeps details and prices side-by-side |
-| `moduleSize` | `string` | `'medium'` | Font/element size: `'small'` (compact padding), `'medium'`, or `'large'` |
+| `moduleSize` | `string` | `'medium'` | Font/element size: `'xxsmall'` (maximum compact tablet layout), `'xsmall'` (tablet-optimized compact layout), `'small'` (compact padding), `'medium'`, or `'large'` |
 | `maxStations` | `number` | `5` | Maximum number of stations to display — stations are sorted by the cheapest available price across your configured fuel types before this limit is applied |
 
 > In both orientations, cheapest-price highlighting is still calculated per selected fuel type across the displayed stations.
@@ -146,5 +146,31 @@ config: {
   compactPriceFormat: true,
   showAddress: false,
   showLastUpdated: false
+}
+```
+
+### Extra-compact tablet layout
+
+```javascript
+config: {
+  method: 'nearby',
+  latitude: 59.9139,
+  longitude: 10.7522,
+  displayMode: 'list',
+  orientation: 'vertical',
+  moduleSize: 'xsmall'
+}
+```
+
+### Maximum compact tablet layout
+
+```javascript
+config: {
+  method: 'nearby',
+  latitude: 59.9139,
+  longitude: 10.7522,
+  displayMode: 'list',
+  orientation: 'vertical',
+  moduleSize: 'xxsmall'
 }
 ```
