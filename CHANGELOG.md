@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.3.0] - 2026-04-21
+
 ### Added
 
 - New extra-compact module sizes for tablet-first layouts:
@@ -31,7 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `node_helper.js` import from `require('https')` to `require('node:https')`.
 - Updated ESLint flat config to use `defineConfig`.
 - Updated lint script from `eslint .` to `eslint`.
+- Updated ESLint dependencies to `eslint@^10.2.1` (keeping `@eslint/js@^10.0.1`, latest available).
 - Standardized `LICENSE` content for clearer automated license detection.
+- Updated README config snippets to use trailing commas in copy/paste examples.
+- Removed all files from `docs/screenshots/` so module-list image selection consistently uses `docs/mmm-fuelnorway-list-hor.png`.
 
 ---
 
@@ -157,4 +164,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/matskkolstad/MMM-FuelNorway/releases/tag/v1.0.0
-[Unreleased]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.2.0...HEAD
+[1.3.0]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.2.0...v1.3.0
+[Unreleased]: https://github.com/matskkolstad/MMM-FuelNorway/compare/v1.3.0...HEAD

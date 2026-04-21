@@ -47,8 +47,8 @@ Add the module to your `config/config.js`:
     method: 'nearby',
     latitude: 59.9139,   // your latitude
     longitude: 10.7522,   // your longitude
-  }
-}
+  },
+},
 ```
 
 ### Full example
@@ -91,8 +91,8 @@ Add the module to your `config/config.js`:
     compactPriceFormat: false,
 
     debug: false,
-  }
-}
+  },
+},
 ```
 
 **Notes**
@@ -124,9 +124,9 @@ Add the module to your `config/config.js`:
     method: 'manual',
     stationIds: ['j1i4da8bf8wkcql', 'mw85fkdf8cq9b5n'],
     displayMode: 'grid',
-    fuelTypes: ['gasoline_price', 'diesel_price', 'hvo100_price']
-  }
-}
+    fuelTypes: ['gasoline_price', 'diesel_price', 'hvo100_price'],
+  },
+},
 ```
 
 ### All configuration options
