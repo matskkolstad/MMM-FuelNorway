@@ -2,7 +2,7 @@
 
 A [MagicMirror²](https://magicmirror.builders/) module that displays live Norwegian fuel prices using the [Drivstoff App](https://www.drivstoffapp.no/) API. Find nearby stations automatically or configure specific stations by ID — with support for petrol, diesel, HVO100, and electric fast-charging prices.
 
-![MMM-FuelNorway screenshot](docs/mmm-fuelnorway-list-hor.png)
+![MMM-FuelNorway screenshot](docs/screenshot.png)
 ---
 
 ## Features
